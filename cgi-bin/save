@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# CGI: POST /cgi-bin/save
+# Recibe el XML en el body, lo valida, lo guarda y regenera la vista.
+
+set -euo pipefail
+
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+XML="$PROJECT_ROOT/data/proyecto.xml"
+DTD="$PROJECT_ROOT/data/proyecto.dtd"
+XSD="$PROJECT_ROOT/data/proyecto.xsd"
+XSL="$PROJECT_ROOT/xsl/proyecto.xsl"
+OUT="$PROJECT_ROOT/out/proyecto.html"
+BACKUP_DIR="$PROJECT_ROOT/data/.backups"
+
+# ---------- Respuesta JSON ----------
+json_out() {
+    local status="$1" body="$2"
+    echo "Status: $status"
+    echo "Content-Type: application/json"
+    echo
+    printf '%s' "$body"
+}
+
+# ---------- Comprobar método ----------
+if [ "${REQUEST_METHOD:-GET}" != "POST" ]; then
+    json_out 405 '{"ok":false,"error":"método no permitido"}'
+    exit 0
+fi
+
+# ---------- Leer body ----------
+LEN="${CONTENT_LENGTH:-0}"
+if [ "$LEN" -eq 0 ]; then
+    json_out 400 '{"ok":false,"error":"body vacío"}'
+    exit 0
+fi
+BODY=$(head -c "$LEN")
+
+# ---------- Backup ----------
+mkdir -p "$BACKUP_DIR"
+TS=$(date +%Y%m%d-%H%M%S)
+cp "$XML" "$BACKUP_DIR/proyecto-$TS.xml"
+
+# ---------- Escribir temporal ----------
+TMP="$XML.tmp.$$"
+printf '%s' "$BODY" > "$TMP"
+
+# ---------- Validar ----------
+if ! xmllint --noout "$TMP" 2>/dev/null; then
+    rm -f "$TMP"
+    json_out 400 '{"ok":false,"error":"XML mal formado"}'
+    exit 0
+fi
+
+if ! xmllint --noout --dtdvalid "$DTD" "$TMP" 2>/dev/null; then
+    rm -f "$TMP"
+    json_out 400 '{"ok":false,"error":"XML inválido contra DTD"}'
+    exit 0
+fi
+
+if ! xmllint --noout --schema "$XSD" "$TMP" 2>/dev/null; then
+    rm -f "$TMP"
+    json_out 400 '{"ok":false,"error":"XML inválido contra XSD"}'
+    exit 0
+fi
+
+# ---------- Commit ----------
+mv "$TMP" "$XML"
+
+# Regenerar la vista XSLT
+if command -v xsltproc >/dev/null 2>&1 && [ -f "$XSL" ]; then
+    xsltproc --output "$OUT" "$XSL" "$XML" 2>/dev/null || true
+fi
+
+# ---------- Respuesta OK ----------
+json_out 200 '{"ok":true}'
