@@ -1,0 +1,1268 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestión de personas y proyectos</title>
+<style>
+/* Diseño sencillo: cabecera clara con pestañas de texto, contenido en tarjetas planas, tablas limpias y un solo color de acento. */
+:root{
+  --bg:#f6f7f9; --surface:#ffffff; --surface-2:#f9fafb; --ink:#1f2937; --muted:#6b7280;
+  --line:#e5e7eb; --line-strong:#cfd5de;
+  --accent:#2563eb; --accent-ink:#ffffff; --accent-soft:#eaf1fe;
+  --ok:#15803d; --ok-bg:#dcf5e5; --warn:#92580a; --warn-bg:#fdf0d3; --bad:#b42333; --bad-bg:#fde8ea; --neu:#4b5563; --neu-bg:#eceef2;
+  --shadow:0 14px 44px rgba(17,24,39,.22);
+  --font-body:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f141c; --surface:#171d28; --surface-2:#1c2330; --ink:#e5e9f0; --muted:#98a2b3;
+    --line:#2a3243; --line-strong:#3b465c;
+    --accent:#6ea0f5; --accent-ink:#0c1320; --accent-soft:#1b2a45;
+    --ok:#6fd69b; --ok-bg:#153325; --warn:#f0c25a; --warn-bg:#3a2e10; --bad:#f08a91; --bad-bg:#3d1a1f; --neu:#aab4c5; --neu-bg:#252d3d;
+    --shadow:0 14px 44px rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f141c; --surface:#171d28; --surface-2:#1c2330; --ink:#e5e9f0; --muted:#98a2b3;
+  --line:#2a3243; --line-strong:#3b465c;
+  --accent:#6ea0f5; --accent-ink:#0c1320; --accent-soft:#1b2a45;
+  --ok:#6fd69b; --ok-bg:#153325; --warn:#f0c25a; --warn-bg:#3a2e10; --bad:#f08a91; --bad-bg:#3d1a1f; --neu:#aab4c5; --neu-bg:#252d3d;
+  --shadow:0 14px 44px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:14px;line-height:1.5}
+h1,h2,h3{text-wrap:balance}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.page{padding-top:22px;padding-bottom:56px}
+
+/* Cabecera */
+.top{background:var(--surface);border-bottom:1px solid var(--line)}
+.titlebar{display:flex;flex-wrap:wrap;gap:12px 20px;justify-content:space-between;align-items:center;padding-top:18px}
+.titlebar h1{margin:0;font-size:20px;font-weight:650;letter-spacing:-.01em}
+.titlebar p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.tabs{display:flex;gap:4px;overflow-x:auto;margin-top:10px}
+.tabs button{font:inherit;font-weight:500;white-space:nowrap;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:10px 14px;cursor:pointer}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* Estructura */
+.stack{display:flex;flex-direction:column;gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;min-width:0}
+.card h2{margin:0 0 12px;font-size:16px;font-weight:600}
+.cardhead{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;margin-bottom:12px}
+.cardhead h2{margin:0}
+h3.sub{margin:18px 0 8px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.muted{color:var(--muted)}
+.mono{font-family:var(--font-mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.note{color:var(--muted);font-size:12.5px;margin:6px 0 0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+
+/* Cifras del panel */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.stat .n{font-size:28px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat .l{color:var(--muted);font-size:13px;margin-top:2px}
+.stat.warn .n{color:var(--warn)} .stat.bad .n{color:var(--bad)}
+
+/* Tablas */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:12px}
+.toolbar .fld{flex:1 1 170px;max-width:280px;min-width:140px}
+.toolbar .grow{flex:1 1 auto}
+.count{font-size:12.5px;color:var(--muted);margin-bottom:8px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{width:100%;border-collapse:collapse;min-width:620px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+th{background:var(--surface-2);color:var(--muted);font-size:12px;font-weight:600;white-space:nowrap}
+td{font-size:13.5px}
+tr.dim td{color:var(--muted)}
+td .sec{display:block;color:var(--muted);font-size:12.5px}
+td .desc{display:block;color:var(--muted);font-size:12.5px;max-width:330px;min-width:190px}
+td.actions{white-space:nowrap}
+td.actions .btn+.btn{margin-left:4px}
+
+/* Etiquetas de estado */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+.badge.activo,.badge.ok{color:var(--ok);background:var(--ok-bg)}
+.badge.inactivo,.badge.cancelado,.badge.bad{color:var(--bad);background:var(--bad-bg)}
+.badge.cerrado,.badge.historico{color:var(--neu);background:var(--neu-bg)}
+.badge.pendiente_reasignacion,.badge.warn{color:var(--warn);background:var(--warn-bg)}
+.rol-director{color:var(--accent);font-weight:600}
+
+/* Botones y campos */
+.btn{font:inherit;font-weight:500;padding:7px 13px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.sm{padding:4px 10px;font-size:12.5px}
+.link{font:inherit;background:none;border:0;padding:0;color:var(--accent);cursor:pointer;text-align:left;font-weight:500}
+.link:hover{text-decoration:underline}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.fld small{color:var(--muted);font-size:12px}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line-strong);border-radius:7px;padding:8px 10px;width:100%;min-width:0}
+textarea{min-height:80px;resize:vertical}
+textarea.xml{font-family:var(--font-mono);font-size:12.5px;min-height:180px;white-space:pre;line-height:1.45}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.form{display:flex;flex-direction:column;gap:14px}
+.form-err{background:var(--bad-bg);color:var(--bad);border-radius:8px;padding:10px 14px}
+.form-err ul{margin:0;padding-left:18px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row .grow{flex:1 1 auto}
+.row.end{justify-content:flex-end}
+.foot{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:6px}
+
+/* Ventanas */
+.overlay{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(15,23,42,.55);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;z-index:50;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.dialog{background:var(--surface);color:var(--ink);border-radius:12px;box-shadow:var(--shadow);width:100%;max-width:540px;margin:auto 0;padding:20px;min-width:0}
+.dialog.wide{max-width:800px}
+.dhead{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.dhead h2{margin:0;font-size:18px;font-weight:600}
+.dhead .sub-id{margin-left:8px}
+.x{font:inherit;font-size:22px;line-height:1;background:none;border:0;color:var(--muted);cursor:pointer;padding:2px 8px;border-radius:6px}
+.x:hover{background:var(--surface-2);color:var(--ink)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:8px;z-index:60;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
+dl.kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 18px;margin:0}
+dl.kv dt{color:var(--muted);font-size:12.5px}
+dl.kv dd{margin:0;overflow-wrap:anywhere}
+.hist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.hist li{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:10px;font-size:13px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.hist li:last-child{border-bottom:0}
+.hist .t{font-weight:600}
+.hist .f{color:var(--muted)}
+.alerts{display:flex;flex-direction:column;gap:8px}
+.alert{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line)}
+.alert.warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+.alert.bad{background:var(--bad-bg);color:var(--bad);border-color:transparent}
+.alert.ok{background:var(--ok-bg);color:var(--ok);border-color:transparent}
+.alert .btn{background:var(--surface);color:var(--ink)}
+.barrow{display:grid;grid-template-columns:170px minmax(0,1fr) 30px;gap:10px;align-items:center;margin:8px 0;font-size:13px}
+.track{background:var(--neu-bg);border-radius:5px;height:10px;overflow:hidden}
+.fill{height:100%;border-radius:5px;background:var(--accent)}
+.fill.activo{background:var(--ok)} .fill.cancelado{background:var(--bad)} .fill.cerrado{background:var(--neu)} .fill.pendiente_reasignacion{background:var(--warn)}
+.barrow .v{font-family:var(--font-mono);text-align:right;font-variant-numeric:tabular-nums}
+pre.out{margin:10px 0 0;padding:12px 14px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;font-family:var(--font-mono);font-size:12.5px;overflow:auto;max-height:320px;white-space:pre-wrap;overflow-wrap:anywhere}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chips button{font-family:var(--font-mono);font-size:12px;padding:3px 9px;border-radius:6px;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--ink);cursor:pointer;max-width:100%;overflow-wrap:anywhere;text-align:left}
+ul.impact{margin:8px 0 0;padding-left:18px}
+ul.impact li{margin:4px 0}
+@media (max-width:600px){
+  .barrow{grid-template-columns:110px minmax(0,1fr) 28px}
+  .hist li{grid-template-columns:minmax(0,1fr)}
+  .dialog{padding:16px}
+  .card{padding:14px}
+}
+@media (prefers-reduced-motion:no-preference){ .fill{transition:width .3s} }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="wrap">
+      <div class="titlebar">
+        <div>
+          <h1>Gestión de personas y proyectos</h1>
+          <p>Directorio de personas, proyectos y equipos</p>
+        </div>
+        <div class="tools">
+          <button type="button" class="btn sm" data-act="importar-xml">Importar XML</button>
+          <button type="button" class="btn sm" data-act="exportar-xml">Exportar XML</button>
+          <button type="button" class="btn sm" data-act="reset-ejemplo">Restablecer datos de ejemplo</button>
+          <input type="file" id="file-import" accept=".xml,application/xml,text/xml" hidden/>
+        </div>
+      </div>
+      <nav class="tabs" id="tabs" aria-label="Secciones"></nav>
+    </div>
+  </header>
+  <main class="wrap page" id="main"></main>
+  <div id="modal-root"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</div>
+<script type="text/plain" id="seed-xml"><?xml version="1.0" encoding="UTF-8"?>
+<datos>
+
+  <!-- ============================================================ -->
+  <!-- PERSONAS                                                     -->
+  <!-- ============================================================ -->
+  <personas>
+
+    <persona id="p001" estado="activo">
+      <nombre>Ana</nombre>
+      <apellidos>García López</apellidos>
+      <email>ana.garcia@ejemplo.com</email>
+      <telefono>555-1001</telefono>
+      <departamento>Desarrollo</departamento>
+      <historial>
+        <evento tipo="creacion"/>
+      </historial>
+    </persona>
+
+    <persona id="p002" estado="activo">
+      <nombre>Luis</nombre>
+      <apellidos>Martínez Ruiz</apellidos>
+      <email>luis.martinez@ejemplo.com</email>
+      <telefono>555-1002</telefono>
+      <departamento>Desarrollo</departamento>
+      <historial>
+        <evento tipo="creacion"/>
+      </historial>
+    </persona>
+
+    <persona id="p003" estado="activo">
+      <nombre>María</nombre>
+      <apellidos>Fernández Soto</apellidos>
+      <email>maria.fernandez@ejemplo.com</email>
+      <telefono>555-1003</telefono>
+      <departamento>Diseño</departamento>
+      <historial>
+        <evento tipo="creacion"/>
+      </historial>
+    </persona>
+
+    <persona id="p004" estado="activo">
+      <nombre>Carlos</nombre>
+      <apellidos>Ruiz Navarro</apellidos>
+      <email>carlos.ruiz@ejemplo.com</email>
+      <telefono>555-1004</telefono>
+      <departamento>QA</departamento>
+      <historial>
+        <evento tipo="creacion"/>
+      </historial>
+    </persona>
+
+    <persona id="p005" estado="inactivo">
+      <nombre>Elena</nombre>
+      <apellidos>Sánchez Vidal</apellidos>
+      <email>elena.sanchez@ejemplo.com</email>
+      <telefono>555-1005</telefono>
+      <departamento>Gestión</departamento>
+      <historial>
+        <evento tipo="creacion"/>
+        <evento tipo="baja" motivo="Renuncia"/>
+      </historial>
+    </persona>
+
+  </personas>
+
+  <!-- ============================================================ -->
+  <!-- PROYECTOS                                                    -->
+  <!-- ============================================================ -->
+  <proyectos>
+
+    <proyecto id="pr001" titularId="p001" estado="activo">
+      <nombre>Sistema de Ventas</nombre>
+      <descripcion>Plataforma de gestión de ventas online con integración a pasarela de pago.</descripcion>
+      <fechaInicio>2025-01-15</fechaInicio>
+      <fechaFin>2025-12-31</fechaFin>
+      <ultimaActualizacion>2026-10-08</ultimaActualizacion>
+      <presupuesto moneda="USD">50000</presupuesto>
+      <historial>
+        <evento tipo="creacion"/>
+      </historial>
+    </proyecto>
+
+    <proyecto id="pr002" titularId="p001" estado="activo">
+      <nombre>App Móvil Clientes</nombre>
+      <descripcion>Aplicación móvil iOS y Android para clientes frecuentes.</descripcion>
+      <fechaInicio>2025-03-01</fechaInicio>
+      <fechaFin>2026-06-30</fechaFin>
+      <ultimaActualizacion>2026-10-08</ultimaActualizacion>
+      <presupuesto moneda="USD">35000</presupuesto>
+      <historial>
+        <evento tipo="creacion"/>
+      </historial>
+    </proyecto>
+
+    <proyecto id="pr003" titularId="p005" estado="pendiente_reasignacion">
+      <nombre>Migración a la Nube</nombre>
+      <descripcion>Traslado de la infraestructura on-premise a servicios cloud.</descripcion>
+      <fechaInicio>2024-09-01</fechaInicio>
+      <fechaFin>2026-03-31</fechaFin>
+      <ultimaActualizacion>2026-10-08</ultimaActualizacion>
+      <presupuesto moneda="USD">75000</presupuesto>
+      <historial>
+        <evento tipo="creacion"/>
+        <evento tipo="pendiente_reasignacion" motivo="Baja de p005"/>
+      </historial>
+    </proyecto>
+
+    <proyecto id="pr004" titularId="p003" estado="cerrado">
+      <nombre>Rediseño de Portal</nombre>
+      <descripcion>Rediseño completo del portal corporativo con nueva identidad visual.</descripcion>
+      <fechaInicio>2023-05-01</fechaInicio>
+      <fechaFin>2024-04-30</fechaFin>
+      <ultimaActualizacion>2024-05-02</ultimaActualizacion>
+      <presupuesto moneda="USD">22000</presupuesto>
+      <historial>
+        <evento tipo="creacion"/>
+        <evento tipo="cierre" motivo="Entrega final"/>
+      </historial>
+    </proyecto>
+
+    <proyecto id="pr005" titularId="p005" estado="cancelado">
+      <nombre>Auditoría de Seguridad</nombre>
+      <descripcion>Auditoría externa de seguridad sobre los sistemas heredados.</descripcion>
+      <fechaInicio>2025-06-01</fechaInicio>
+      <ultimaActualizacion>2026-10-08</ultimaActualizacion>
+      <historial>
+        <evento tipo="creacion"/>
+        <evento tipo="cancelacion" motivo="Baja del único participante (p005)"/>
+      </historial>
+    </proyecto>
+
+  </proyectos>
+
+  <!-- ============================================================ -->
+  <!-- PARTICIPACIONES                                              -->
+  <!-- ============================================================ -->
+  <participaciones>
+
+    <!-- pr001: Sistema de Ventas -->
+    <participacion id="pa001" personaId="p001" proyectoId="pr001" rol="director"   estado="activo"/>
+    <participacion id="pa002" personaId="p002" proyectoId="pr001" rol="miembro"    estado="activo"/>
+    <participacion id="pa003" personaId="p004" proyectoId="pr001" rol="miembro"    estado="activo"/>
+
+    <!-- pr002: App Móvil Clientes -->
+    <participacion id="pa004" personaId="p001" proyectoId="pr002" rol="director"   estado="activo"/>
+    <participacion id="pa005" personaId="p002" proyectoId="pr002" rol="miembro"    estado="activo"/>
+    <participacion id="pa006" personaId="p004" proyectoId="pr002" rol="observador" estado="activo"/>
+
+    <!-- pr003: Migración a la Nube -->
+    <participacion id="pa007" personaId="p005" proyectoId="pr003" rol="director"   estado="historico"/>
+    <participacion id="pa008" personaId="p002" proyectoId="pr003" rol="miembro"    estado="activo"/>
+    <participacion id="pa009" personaId="p003" proyectoId="pr003" rol="miembro"    estado="activo"/>
+
+    <!-- pr004: Rediseño de Portal (cerrado) -->
+    <participacion id="pa010" personaId="p003" proyectoId="pr004" rol="director"   estado="activo"/>
+    <participacion id="pa011" personaId="p004" proyectoId="pr004" rol="observador" estado="activo"/>
+
+    <!-- pr005: Auditoría de Seguridad (cancelado) -->
+    <participacion id="pa012" personaId="p005" proyectoId="pr005" rol="director"   estado="historico"/>
+
+  </participaciones>
+
+</datos></script>
+<script>
+(function(){
+'use strict';
+/* ===================== Constantes ===================== */
+var MONEDAS=['USD','EUR','MXN','GBP','JPY'];
+var ABIERTOS=['activo','pendiente_reasignacion'];
+var TIPOS_EVENTO=['creacion','actualizacion','baja','reactivacion','cancelacion','cierre','pendiente_reasignacion','reasignacion','salida','reincorporacion'];
+var EVENTOS={creacion:'Creación',actualizacion:'Actualización',baja:'Baja',reactivacion:'Reactivación',cancelacion:'Cancelación',cierre:'Cierre',pendiente_reasignacion:'Pendiente de reasignación',reasignacion:'Reasignación',salida:'Salida',reincorporacion:'Reincorporación'};
+var ROL={director:'Director',miembro:'Miembro',observador:'Observador'};
+var LBL={activo:'activo',inactivo:'inactivo',cerrado:'cerrado',cancelado:'cancelado',pendiente_reasignacion:'pendiente de reasignación',historico:'histórico'};
+var RE_EMAIL=/^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/;
+var RE_TEL=/^[0-9\-+\s]{6,20}$/;
+var KEY='gpp-xml-v2';
+
+/* ===================== Utilidades ===================== */
+function $(s,r){return (r||document).querySelector(s);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function hoy(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function diasEntre(a,b){return Math.round((Date.parse(b)-Date.parse(a))/864e5);}
+function VErr(list){this.list=list;this.message=list.join(' ');}
+VErr.prototype=Object.create(Error.prototype);
+function fechaValida(s){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');if(!m)return false;var d=new Date(+m[1],+m[2]-1,+m[3]);return d.getFullYear()===+m[1]&&d.getMonth()===+m[2]-1&&d.getDate()===+m[3];}
+
+/* ===================== Modelo ===================== */
+var DB={personas:[],proyectos:[],participaciones:[]};
+function byP(id){return DB.personas.find(function(p){return p.id===id;});}
+function byY(id){return DB.proyectos.find(function(p){return p.id===id;});}
+function byA(id){return DB.participaciones.find(function(p){return p.id===id;});}
+function nom(p){return p?p.nombre+' '+p.apellidos:'—';}
+function abierto(pr){return ABIERTOS.indexOf(pr.estado)>=0;}
+function vencido(pr){return abierto(pr)&&!!pr.fechaFin&&pr.fechaFin<hoy();}
+function nextId(prefix,arr){var re=new RegExp('^'+prefix+'(\\d+)$');var n=0;arr.forEach(function(o){var m=re.exec(o.id);if(m)n=Math.max(n,+m[1]);});return prefix+String(n+1).padStart(3,'0');}
+function evento(h,tipo,motivo,campo){var e={tipo:tipo};if(motivo)e.motivo=motivo;if(campo)e.campo=campo;e.fecha=hoy();h.push(e);}
+function touch(pr){pr.ultimaActualizacion=hoy();}
+function fmtMonto(pr){return pr.presupuesto?pr.presupuesto.moneda+' '+Number(pr.presupuesto.monto).toLocaleString('es-MX'):'No definido';}
+function activasDe(pid){return DB.participaciones.filter(function(a){return a.personaId===pid&&a.estado==='activo';});}
+
+/* ---------- XML: lectura ---------- */
+function validarEsquema(db){
+  var er=[],ids={};
+  function chkId(id,etq){
+    if(!id||!/^[A-Za-z_][\w.\-]*$/.test(id)){er.push(etq+': identificador no válido ('+(id||'vacío')+').');return;}
+    if(ids[id])er.push('Identificador repetido: '+id+'.');
+    ids[id]=1;
+  }
+  function chkEv(h,etq){h.forEach(function(e){
+    if(TIPOS_EVENTO.indexOf(e.tipo)<0)er.push(etq+': tipo de evento no válido ('+e.tipo+').');
+    if(e.fecha&&!fechaValida(e.fecha))er.push(etq+': fecha de evento no válida ('+e.fecha+').');
+  });}
+  db.personas.forEach(function(p){
+    var t='Persona '+p.id;chkId(p.id,t);
+    if(['activo','inactivo'].indexOf(p.estado)<0)er.push(t+': estado no válido.');
+    if(!p.nombre||p.nombre.length>100)er.push(t+': nombre vacío o de más de 100 caracteres.');
+    if(!p.apellidos||p.apellidos.length>100)er.push(t+': apellidos vacíos o de más de 100 caracteres.');
+    if(!RE_EMAIL.test(p.email||''))er.push(t+': correo electrónico no válido.');
+    if(p.telefono&&!RE_TEL.test(p.telefono))er.push(t+': teléfono no válido.');
+    if(p.departamento&&p.departamento.length>100)er.push(t+': departamento de más de 100 caracteres.');
+    chkEv(p.historial,t);
+  });
+  db.proyectos.forEach(function(p){
+    var t='Proyecto '+p.id;chkId(p.id,t);
+    if(ESTADOS_PROY.indexOf(p.estado)<0)er.push(t+': estado no válido.');
+    if(!db.personas.some(function(x){return x.id===p.titularId;}))er.push(t+': el titular '+p.titularId+' no existe.');
+    if(!p.nombre||p.nombre.length>100)er.push(t+': nombre vacío o de más de 100 caracteres.');
+    if(!p.descripcion||p.descripcion.length>500)er.push(t+': descripción vacía o de más de 500 caracteres.');
+    if(!fechaValida(p.fechaInicio))er.push(t+': fecha de inicio no válida.');
+    if(p.fechaFin&&!fechaValida(p.fechaFin))er.push(t+': fecha de fin no válida.');
+    if(!fechaValida(p.ultimaActualizacion))er.push(t+': última actualización no válida.');
+    if(p.presupuesto){
+      var m=p.presupuesto.monto;
+      if(!/^\d+(\.\d+)?$/.test(m)||!(Number(m)>0))er.push(t+': el presupuesto debe ser un número mayor que cero.');
+      if(MONEDAS.indexOf(p.presupuesto.moneda)<0)er.push(t+': moneda no válida ('+p.presupuesto.moneda+').');
+    }
+    chkEv(p.historial,t);
+  });
+  db.participaciones.forEach(function(a){
+    var t='Participación '+a.id;chkId(a.id,t);
+    if(!db.personas.some(function(x){return x.id===a.personaId;}))er.push(t+': la persona '+a.personaId+' no existe.');
+    if(!db.proyectos.some(function(x){return x.id===a.proyectoId;}))er.push(t+': el proyecto '+a.proyectoId+' no existe.');
+    if(['director','miembro','observador'].indexOf(a.rol)<0)er.push(t+': rol no válido.');
+    if(['activo','historico'].indexOf(a.estado)<0)er.push(t+': estado no válido.');
+  });
+  if(!db.personas.length)er.push('Debe haber al menos una persona.');
+  if(!db.proyectos.length)er.push('Debe haber al menos un proyecto.');
+  return er;
+}
+var ESTADOS_PROY=['activo','pendiente_reasignacion','cerrado','cancelado'];
+
+function parseXML(text){
+  var doc=new DOMParser().parseFromString(text,'application/xml');
+  if(doc.getElementsByTagName('parsererror').length)return {errors:['El texto no es un XML bien formado.']};
+  var root=doc.documentElement;
+  if(!root||root.nodeName!=='datos')return {errors:['El elemento raíz debe ser <datos>.']};
+  function kids(el,n){return Array.prototype.filter.call(el.children,function(c){return c.nodeName===n;});}
+  function one(el,n){return kids(el,n)[0]||null;}
+  function tx(el,n){var c=one(el,n);return c?c.textContent.trim():null;}
+  function hist(el){var h=one(el,'historial');if(!h)return [];return kids(h,'evento').map(function(e){var o={tipo:e.getAttribute('tipo')};['motivo','campo','fecha'].forEach(function(a){if(e.hasAttribute(a))o[a]=e.getAttribute(a);});return o;});}
+  var lp=one(root,'personas'),ly=one(root,'proyectos'),lc=one(root,'participaciones');
+  if(!lp||!ly||!lc)return {errors:['Faltan los bloques <personas>, <proyectos> o <participaciones>.']};
+  var db={personas:[],proyectos:[],participaciones:[]};
+  kids(lp,'persona').forEach(function(e){db.personas.push({id:e.getAttribute('id'),estado:e.getAttribute('estado'),nombre:tx(e,'nombre'),apellidos:tx(e,'apellidos'),email:tx(e,'email'),telefono:tx(e,'telefono')||'',departamento:tx(e,'departamento')||'',historial:hist(e)});});
+  kids(ly,'proyecto').forEach(function(e){var pe=one(e,'presupuesto');db.proyectos.push({id:e.getAttribute('id'),titularId:e.getAttribute('titularId'),estado:e.getAttribute('estado'),nombre:tx(e,'nombre'),descripcion:tx(e,'descripcion'),fechaInicio:tx(e,'fechaInicio'),fechaFin:tx(e,'fechaFin')||'',ultimaActualizacion:tx(e,'ultimaActualizacion'),presupuesto:pe?{moneda:pe.getAttribute('moneda')||'USD',monto:pe.textContent.trim()}:null,historial:hist(e)});});
+  kids(lc,'participacion').forEach(function(e){db.participaciones.push({id:e.getAttribute('id'),personaId:e.getAttribute('personaId'),proyectoId:e.getAttribute('proyectoId'),rol:e.getAttribute('rol'),estado:e.getAttribute('estado')});});
+  return {db:db,errors:validarEsquema(db)};
+}
+
+/* ---------- XML: escritura ---------- */
+function toXML(db){
+  var L=[];
+  function P(){for(var i=0;i<arguments.length;i++)if(arguments[i])L.push(arguments[i]);}
+  function hist(h,ind){
+    if(!h.length)return ind+'<historial/>';
+    return [ind+'<historial>'].concat(h.map(function(e){
+      return ind+'  <evento tipo="'+esc(e.tipo)+'"'+(e.motivo?' motivo="'+esc(e.motivo)+'"':'')+(e.campo?' campo="'+esc(e.campo)+'"':'')+(e.fecha?' fecha="'+esc(e.fecha)+'"':'')+'/>';
+    })).concat([ind+'</historial>']).join('\n');
+  }
+  P('<?xml version="1.0" encoding="UTF-8"?>');
+  P('<datos xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="proyecto.xsd">');
+  P('','  <personas>','');
+  db.personas.forEach(function(p){
+    P('    <persona id="'+esc(p.id)+'" estado="'+esc(p.estado)+'">',
+      '      <nombre>'+esc(p.nombre)+'</nombre>',
+      '      <apellidos>'+esc(p.apellidos)+'</apellidos>',
+      '      <email>'+esc(p.email)+'</email>',
+      p.telefono?'      <telefono>'+esc(p.telefono)+'</telefono>':'',
+      p.departamento?'      <departamento>'+esc(p.departamento)+'</departamento>':'',
+      hist(p.historial,'      '),
+      '    </persona>','');
+  });
+  P('  </personas>','','  <proyectos>','');
+  db.proyectos.forEach(function(p){
+    P('    <proyecto id="'+esc(p.id)+'" titularId="'+esc(p.titularId)+'" estado="'+esc(p.estado)+'">',
+      '      <nombre>'+esc(p.nombre)+'</nombre>',
+      '      <descripcion>'+esc(p.descripcion)+'</descripcion>',
+      '      <fechaInicio>'+esc(p.fechaInicio)+'</fechaInicio>',
+      p.fechaFin?'      <fechaFin>'+esc(p.fechaFin)+'</fechaFin>':'',
+      '      <ultimaActualizacion>'+esc(p.ultimaActualizacion)+'</ultimaActualizacion>',
+      p.presupuesto?'      <presupuesto moneda="'+esc(p.presupuesto.moneda)+'">'+esc(p.presupuesto.monto)+'</presupuesto>':'',
+      hist(p.historial,'      '),
+      '    </proyecto>','');
+  });
+  P('  </proyectos>','','  <participaciones>','');
+  db.participaciones.forEach(function(a){
+    P('    <participacion id="'+esc(a.id)+'" personaId="'+esc(a.personaId)+'" proyectoId="'+esc(a.proyectoId)+'" rol="'+esc(a.rol)+'" estado="'+esc(a.estado)+'"/>');
+  });
+  P('','  </participaciones>','','</datos>','');
+  return L.join('\n');
+}
+
+/* ---------- Persistencia (solo comodidad del navegador) ---------- */
+function seed(){return parseXML($('#seed-xml').textContent.trim()).db;}
+function persist(){
+  var xml = toXML(DB);
+  try{ localStorage.setItem(KEY, xml); }catch(e){}
+  saveToServer(xml);
+}
+
+var _saveTimer = null;
+function saveToServer(xml){
+  if(!window.fetch) return;
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(function(){
+    fetch('/cgi-bin/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/xml;charset=utf-8' },
+      body: xml
+    })
+    .then(function(r){
+      if(!r.ok){
+        r.json().then(function(j){
+          console.warn('Servidor rechazó el guardado:', j.error || r.status);
+          toast('No se pudo guardar en el servidor: ' + (j.error || r.status));
+        }).catch(function(){ console.warn('Error HTTP', r.status); });
+      } else {
+        console.log('✓ Persistido en data/proyecto.xml');
+      }
+    })
+    .catch(function(){ /* servidor no disponible → sigue solo localStorage */ });
+  }, 400);   // debounce: agrupa cambios rápidos
+}
+function load(){
+  var t=null;try{t=localStorage.getItem(KEY);}catch(e){}
+  if(t){var r=parseXML(t);if(r.db&&!r.errors.length)return r.db;}
+  return seed();
+}
+
+/* ===================== Reglas de negocio ===================== */
+function validaPersona(d,idActual){
+  var er=[];
+  if(!d.nombre)er.push('El nombre es obligatorio.');else if(d.nombre.length>100)er.push('El nombre admite hasta 100 caracteres.');
+  if(!d.apellidos)er.push('Los apellidos son obligatorios.');else if(d.apellidos.length>100)er.push('Los apellidos admiten hasta 100 caracteres.');
+  if(!d.email)er.push('El correo electrónico es obligatorio.');
+  else if(!RE_EMAIL.test(d.email))er.push('El correo electrónico no tiene un formato válido.');
+  else if(DB.personas.some(function(p){return p.id!==idActual&&p.email.toLowerCase()===d.email.toLowerCase();}))er.push('Ya existe una persona con ese correo.');
+  if(d.telefono&&!RE_TEL.test(d.telefono))er.push('El teléfono debe tener de 6 a 20 caracteres: dígitos, guiones, + o espacios.');
+  if(d.departamento&&d.departamento.length>100)er.push('El departamento admite hasta 100 caracteres.');
+  return er;
+}
+function validaProyecto(d){
+  var er=[];
+  if(!d.nombre)er.push('El nombre del proyecto es obligatorio.');else if(d.nombre.length>100)er.push('El nombre admite hasta 100 caracteres.');
+  if(!d.descripcion)er.push('La descripción es obligatoria.');else if(d.descripcion.length>500)er.push('La descripción admite hasta 500 caracteres.');
+  if(!fechaValida(d.fechaInicio))er.push('Indica una fecha de inicio válida.');
+  if(d.fechaFin&&!fechaValida(d.fechaFin))er.push('La fecha de fin no es válida.');
+  if(fechaValida(d.fechaInicio)&&d.fechaFin&&fechaValida(d.fechaFin)&&d.fechaFin<d.fechaInicio)er.push('La fecha de fin no puede ser anterior a la de inicio.');
+  if(d.monto!==''){
+    var n=Number(d.monto);
+    if(!isFinite(n)||n<=0)er.push('El presupuesto debe ser un número mayor que cero.');
+    else if(n>1e15)er.push('El presupuesto es demasiado grande.');
+    if(MONEDAS.indexOf(d.moneda)<0)er.push('Elige una moneda válida.');
+  }
+  return er;
+}
+function crearPersona(d){
+  var p={id:nextId('p',DB.personas),estado:'activo',nombre:d.nombre,apellidos:d.apellidos,email:d.email,telefono:d.telefono,departamento:d.departamento,historial:[]};
+  evento(p.historial,'creacion');DB.personas.push(p);return p;
+}
+function actualizarPersona(id,d){
+  var p=byP(id),ch=[];
+  ['nombre','apellidos','email','telefono','departamento'].forEach(function(k){if((p[k]||'')!==(d[k]||''))ch.push(k);});
+  if(!ch.length)throw new Error('No hay cambios que guardar.');
+  ch.forEach(function(k){p[k]=d[k];});
+  evento(p.historial,'actualizacion',null,ch.join(', '));
+}
+function planBaja(id){
+  return activasDe(id).map(function(pa){
+    var pr=byY(pa.proyectoId),efecto=null;
+    if(abierto(pr)){
+      var otros=DB.participaciones.filter(function(o){return o.proyectoId===pr.id&&o.estado==='activo'&&o.personaId!==id;});
+      if(pr.titularId===id&&pr.estado==='activo')efecto=otros.length?'pendiente_reasignacion':'cancelado';
+      else efecto='salida';
+    }
+    return {pa:pa,pr:pr,efecto:efecto};
+  });
+}
+function bajaPersona(id,motivo){
+  var p=byP(id);
+  if(p.estado!=='activo')throw new Error('La persona ya está dada de baja.');
+  if(!motivo)throw new VErr(['Indica el motivo de la baja.']);
+  planBaja(id).forEach(function(it){
+    it.pa.estado='historico';
+    if(it.efecto==='pendiente_reasignacion'){it.pr.estado='pendiente_reasignacion';evento(it.pr.historial,'pendiente_reasignacion','Baja de '+id);touch(it.pr);}
+    else if(it.efecto==='cancelado'){it.pr.estado='cancelado';evento(it.pr.historial,'cancelacion','Baja del único participante ('+id+')');touch(it.pr);}
+    else if(it.efecto==='salida'){evento(it.pr.historial,'salida','Baja de '+id);touch(it.pr);}
+  });
+  p.estado='inactivo';evento(p.historial,'baja',motivo);
+}
+function reactivarPersona(id){
+  var p=byP(id);if(p.estado!=='inactivo')throw new Error('La persona ya está activa.');
+  p.estado='activo';evento(p.historial,'reactivacion');
+}
+function crearProyecto(d,titularId){
+  var id=nextId('pr',DB.proyectos);
+  var pr={id:id,titularId:titularId,estado:'activo',nombre:d.nombre,descripcion:d.descripcion,fechaInicio:d.fechaInicio,fechaFin:d.fechaFin,ultimaActualizacion:hoy(),
+    presupuesto:d.monto!==''?{moneda:d.moneda,monto:String(Number(d.monto))}:null,historial:[]};
+  evento(pr.historial,'creacion');DB.proyectos.push(pr);
+  DB.participaciones.push({id:nextId('pa',DB.participaciones),personaId:titularId,proyectoId:id,rol:'director',estado:'activo'});
+  return pr;
+}
+function actualizarProyecto(id,d){
+  var pr=byY(id);if(!abierto(pr))throw new Error('Un proyecto cerrado o cancelado es de solo lectura.');
+  var ch=[];
+  ['nombre','descripcion','fechaInicio','fechaFin'].forEach(function(k){if((pr[k]||'')!==(d[k]||''))ch.push(k);});
+  var antes=pr.presupuesto?pr.presupuesto.moneda+' '+Number(pr.presupuesto.monto):'';
+  var nuevo=d.monto!==''?d.moneda+' '+Number(d.monto):'';
+  if(antes!==nuevo)ch.push('presupuesto');
+  if(!ch.length)throw new Error('No hay cambios que guardar.');
+  ['nombre','descripcion','fechaInicio','fechaFin'].forEach(function(k){pr[k]=d[k];});
+  pr.presupuesto=d.monto!==''?{moneda:d.moneda,monto:String(Number(d.monto))}:null;
+  evento(pr.historial,'actualizacion',null,ch.join(', '));touch(pr);
+}
+function reasignarProyecto(id,nuevoId){
+  var pr=byY(id);if(!abierto(pr))throw new Error('Solo se reasignan proyectos activos o pendientes de reasignación.');
+  var nuevo=byP(nuevoId);if(!nuevo||nuevo.estado!=='activo')throw new Error('El nuevo titular debe ser una persona activa.');
+  if(pr.estado==='activo'&&nuevoId===pr.titularId)throw new Error('Esa persona ya es la titular del proyecto.');
+  var viejo=pr.titularId;
+  DB.participaciones.forEach(function(a){if(a.proyectoId===id&&a.personaId===viejo&&a.rol==='director'&&a.estado==='activo')a.rol='miembro';});
+  var pa=DB.participaciones.find(function(a){return a.proyectoId===id&&a.personaId===nuevoId;});
+  if(pa){pa.rol='director';pa.estado='activo';}
+  else DB.participaciones.push({id:nextId('pa',DB.participaciones),personaId:nuevoId,proyectoId:id,rol:'director',estado:'activo'});
+  pr.titularId=nuevoId;pr.estado='activo';
+  evento(pr.historial,'reasignacion','Titular '+viejo+' → '+nuevoId);touch(pr);
+}
+function cerrarProyecto(id,motivo,modo){
+  var pr=byY(id);if(!abierto(pr))throw new Error('El proyecto ya está cerrado o cancelado.');
+  if(!motivo)throw new VErr(['Indica el motivo.']);
+  if(modo==='cierre'){
+    pr.estado='cerrado';
+    if(!pr.fechaFin)pr.fechaFin=hoy()<pr.fechaInicio?pr.fechaInicio:hoy();
+    evento(pr.historial,'cierre',motivo);
+  }else{
+    pr.estado='cancelado';evento(pr.historial,'cancelacion',motivo);
+  }
+  touch(pr);
+}
+function altaParticipacion(personaId,proyectoId,rol){
+  var p=byP(personaId),pr=byY(proyectoId);
+  if(!p||p.estado!=='activo')throw new VErr(['Solo se pueden asignar personas activas.']);
+  if(!pr||!abierto(pr))throw new VErr(['El proyecto está cerrado o cancelado.']);
+  if(rol!=='miembro'&&rol!=='observador')throw new VErr(['El director se define al reasignar el titular del proyecto.']);
+  var ex=DB.participaciones.find(function(a){return a.personaId===personaId&&a.proyectoId===proyectoId;});
+  if(ex&&ex.estado==='activo')throw new VErr(['La persona ya participa en este proyecto.']);
+  if(ex){ex.estado='activo';ex.rol=rol;evento(pr.historial,'reincorporacion','Reincorporación de '+personaId+' como '+rol);}
+  else{
+    DB.participaciones.push({id:nextId('pa',DB.participaciones),personaId:personaId,proyectoId:proyectoId,rol:rol,estado:'activo'});
+    evento(pr.historial,'actualizacion','Alta de '+personaId+' como '+rol,'equipo');
+  }
+  touch(pr);
+}
+function cambiarRol(paId,rol){
+  var a=byA(paId),pr=byY(a.proyectoId);
+  if(!abierto(pr))throw new Error('El proyecto está cerrado o cancelado.');
+  if(a.estado!=='activo')throw new Error('La participación es histórica.');
+  if(a.rol==='director')throw new Error('El director cambia al reasignar el titular del proyecto.');
+  if(rol!=='miembro'&&rol!=='observador')throw new Error('Rol no permitido.');
+  if(a.rol===rol)throw new Error('La persona ya tiene ese rol.');
+  evento(pr.historial,'actualizacion',a.personaId+': '+a.rol+' → '+rol,'rol');a.rol=rol;touch(pr);
+}
+function salidaParticipacion(paId,motivo){
+  var a=byA(paId),pr=byY(a.proyectoId);
+  if(!abierto(pr))throw new Error('El proyecto está cerrado o cancelado.');
+  if(a.estado!=='activo')throw new Error('La participación ya es histórica.');
+  if(a.rol==='director')throw new VErr(['Para sacar al director, primero reasigna el titular del proyecto.']);
+  a.estado='historico';evento(pr.historial,'salida',motivo||('Salida de '+a.personaId));touch(pr);
+}
+function validarNegocio(db){
+  var out=[];
+  function add(n,t,ref){out.push({nivel:n,texto:t,ref:ref||''});}
+  db.proyectos.forEach(function(pr){
+    var tit=db.personas.find(function(p){return p.id===pr.titularId;});
+    var dirs=db.participaciones.filter(function(a){return a.proyectoId===pr.id&&a.rol==='director'&&a.estado==='activo';});
+    if(pr.estado==='activo'){
+      if(!tit||tit.estado!=='activo')add('error','El proyecto «'+pr.nombre+'» está activo pero su titular no está activo.',pr.id);
+      if(dirs.length!==1)add('error','El proyecto «'+pr.nombre+'» tiene '+dirs.length+' directores activos; debe tener uno.',pr.id);
+      else if(dirs[0].personaId!==pr.titularId)add('error','El director activo de «'+pr.nombre+'» no coincide con el titular.',pr.id);
+    }
+    if(pr.estado==='pendiente_reasignacion'&&tit&&tit.estado==='activo')add('aviso','«'+pr.nombre+'» está pendiente de reasignación aunque su titular sigue activo.',pr.id);
+    if(pr.fechaFin&&pr.fechaInicio&&pr.fechaFin<pr.fechaInicio)add('error','«'+pr.nombre+'»: la fecha de fin es anterior a la de inicio.',pr.id);
+  });
+  db.personas.forEach(function(p){
+    if(p.estado==='inactivo'&&db.participaciones.some(function(a){return a.personaId===p.id&&a.estado==='activo';}))
+      add('error',nom(p)+' está inactiva pero conserva participaciones activas.',p.id);
+  });
+  var vistos={};
+  db.participaciones.forEach(function(a){
+    if(a.estado!=='activo')return;
+    var k=a.personaId+'|'+a.proyectoId;
+    if(vistos[k])add('error','Participación activa duplicada: '+a.personaId+' en '+a.proyectoId+'.',a.id);
+    vistos[k]=1;
+  });
+  return out;
+}
+
+
+/* ===================== Estado de interfaz ===================== */
+var DB=load();
+var ui={view:'panel',
+  filtros:{personas:{q:'',estado:''},proyectos:{q:'',estado:''}},
+  consulta:{id:'proy-persona',arg:''}};
+var lastFocus=null,toastT=null,downEnOverlay=false;
+
+/* ===================== Helpers de interfaz ===================== */
+function badge(e){return '<span class="badge '+esc(e)+'">'+esc(LBL[e]||e)+'</span>';}
+function rolHtml(r){return r==='director'?'<span class="rol-director">Director</span>':esc(ROL[r]||r);}
+function optHtml(arr,sel){return arr.map(function(o){return '<option value="'+esc(o[0])+'"'+(String(o[0])===String(sel)?' selected':'')+'>'+esc(o[1])+'</option>';}).join('');}
+function fld(id,label,inner,hint){return '<div class="fld"><label for="'+id+'">'+label+'</label>'+inner+(hint?'<small>'+hint+'</small>':'')+'</div>';}
+function personasOpts(soloActivas){return DB.personas.filter(function(p){return !soloActivas||p.estado==='activo';}).map(function(p){return [p.id,nom(p)+' ('+p.id+')'+(p.estado==='inactivo'?' · inactiva':'')];});}
+function proyectosOpts(soloAbiertos){return DB.proyectos.filter(function(p){return !soloAbiertos||abierto(p);}).map(function(p){return [p.id,p.nombre+' ('+p.id+')'];});}
+function toast(msg){var t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;},4200);}
+function histHtml(h){
+  if(!h.length)return '<p class="muted" style="margin:0">Sin eventos registrados.</p>';
+  return '<ol class="hist">'+h.map(function(e){
+    return '<li><span class="t">'+esc(EVENTOS[e.tipo]||e.tipo)+'</span><span>'+esc(e.motivo||'')+(e.campo?' <span class="f">· campo: '+esc(e.campo)+'</span>':'')+'</span><span class="f mono">'+esc(e.fecha||'sin fecha')+'</span></li>';
+  }).join('')+'</ol>';
+}
+function bars(items){
+  var max=Math.max.apply(null,items.map(function(i){return i.v;}).concat([1]));
+  return items.map(function(i){return '<div class="barrow"><span>'+esc(i.l)+'</span><div class="track"><div class="fill '+esc(i.c||'')+'" style="width:'+(i.v/max*100)+'%"></div></div><span class="v">'+i.v+'</span></div>';}).join('');
+}
+function tabla(cols,rows,opts){
+  opts=opts||{};
+  var head='<tr>'+cols.map(function(c){return '<th>'+esc(c)+'</th>';}).join('')+'</tr>';
+  var body=rows.length?rows.map(function(r){return '<tr'+(r.dim?' class="dim"':'')+'>'+r.cells.map(function(c){return '<td>'+c+'</td>';}).join('')+'</tr>';}).join(''):'<tr><td colspan="'+cols.length+'" class="muted">'+esc(opts.vacio||'Sin resultados.')+'</td></tr>';
+  return '<div class="tablewrap"><table><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div>';
+}
+function modal(titulo,html,o){
+  o=o||{};
+  lastFocus=document.activeElement;
+  $('#modal-root').innerHTML='<div class="overlay"><div class="dialog'+(o.wide?' wide':'')+'" role="dialog" aria-modal="true" aria-label="'+esc(titulo)+'" tabindex="-1">'+
+    '<div class="dhead"><div><h2 style="display:inline">'+esc(titulo)+'</h2>'+(o.badge?' '+o.badge:'')+(o.id?'<span class="mono muted sub-id">'+esc(o.id)+'</span>':'')+'</div>'+
+    '<button type="button" class="x" data-act="cerrar-ventana" aria-label="Cerrar ventana" title="Cerrar ventana">×</button></div>'+html+'</div></div>';
+  var d=$('.dialog'),f=d.querySelector('input:not([type=hidden]),select,textarea');(f||d).focus();
+}
+function closeModal(){$('#modal-root').innerHTML='';if(lastFocus&&lastFocus.focus&&document.contains(lastFocus))lastFocus.focus();}
+function backFn(s){
+  if(!s)return null;var p=s.split(':');
+  if(p[0]==='persona')return function(){verPersona(p[1]);};
+  if(p[0]==='proyecto')return function(){verProyecto(p[1]);};
+  return null;
+}
+function formShell(name,data,body,submitTxt,opts){
+  opts=opts||{};
+  return '<form class="form" data-form="'+name+'" data-id="'+esc(data.id||'')+'" data-back="'+esc(data.back||'')+'"'+(data.modo?' data-modo="'+esc(data.modo)+'"':'')+' novalidate>'+body+
+    '<div class="form-err" role="alert" hidden></div><div class="foot"><button type="button" class="btn" data-act="volver" data-back="'+esc(data.back||'')+'">Volver</button><button type="submit" class="btn '+(opts.danger?'danger':'primary')+'">'+esc(submitTxt)+'</button></div></form>';
+}
+/* ===================== Formularios ===================== */
+function formPersona(id,back){
+  var p=id?byP(id):null,deptos=[];
+  DB.personas.forEach(function(x){if(x.departamento&&deptos.indexOf(x.departamento)<0)deptos.push(x.departamento);});
+  var body='<div class="grid2">'+
+    fld('f-nombre','Nombre','<input id="f-nombre" name="nombre" maxlength="100" value="'+esc(p?p.nombre:'')+'" autocomplete="off">')+
+    fld('f-apellidos','Apellidos','<input id="f-apellidos" name="apellidos" maxlength="100" value="'+esc(p?p.apellidos:'')+'" autocomplete="off">')+
+    fld('f-email','Correo electrónico','<input id="f-email" name="email" type="email" value="'+esc(p?p.email:'')+'" autocomplete="off">')+
+    fld('f-tel','Teléfono (opcional)','<input id="f-tel" name="telefono" maxlength="20" value="'+esc(p?p.telefono:'')+'" autocomplete="off">','Dígitos, guiones, + o espacios.')+
+    fld('f-depto','Departamento (opcional)','<input id="f-depto" name="departamento" list="deptos" maxlength="100" value="'+esc(p?p.departamento:'')+'" autocomplete="off"><datalist id="deptos">'+deptos.map(function(d){return '<option value="'+esc(d)+'">';}).join('')+'</datalist>')+
+    '</div>';
+  modal(p?'Editar persona':'Nueva persona',formShell('persona',{id:id,back:back},body,p?'Guardar cambios':'Dar de alta'),{id:p?p.id:''});
+}
+function formBaja(id,back){
+  var p=byP(id),plan=planBaja(id);
+  var txt={pendiente_reasignacion:'queda pendiente de reasignación (era titular y quedan otros integrantes activos).',cancelado:'se cancela (era su único integrante activo).',salida:'la persona sale del equipo.'};
+  var imp=plan.length?'<ul class="impact">'+plan.map(function(it){
+    return '<li><strong>'+esc(it.pr.nombre)+'</strong>: '+(it.efecto?esc(txt[it.efecto]):'el proyecto está '+esc(LBL[it.pr.estado])+' y no cambia.')+' Su participación pasa a histórica.</li>';
+  }).join('')+'</ul>':'<p class="muted" style="margin:6px 0 0">No tiene participaciones activas.</p>';
+  var body='<p style="margin:0">Vas a dar de baja a <strong>'+esc(nom(p))+'</strong>. Efectos sobre sus proyectos:</p>'+imp+
+    fld('f-motivo','Motivo de la baja','<input id="f-motivo" name="motivo" maxlength="200" placeholder="Por ejemplo: Renuncia" autocomplete="off">');
+  modal('Dar de baja a la persona',formShell('baja',{id:id,back:back},body,'Dar de baja',{danger:true}),{id:p.id});
+}
+function formProyecto(id,back){
+  var pr=id?byY(id):null;
+  var mon=pr&&pr.presupuesto?pr.presupuesto.moneda:'USD',monto=pr&&pr.presupuesto?pr.presupuesto.monto:'';
+  var body=
+    fld('f-pnombre','Nombre del proyecto','<input id="f-pnombre" name="nombre" maxlength="100" value="'+esc(pr?pr.nombre:'')+'" autocomplete="off">')+
+    fld('f-pdesc','Descripción','<textarea id="f-pdesc" name="descripcion" maxlength="500">'+esc(pr?pr.descripcion:'')+'</textarea>','Hasta 500 caracteres.')+
+    '<div class="grid2">'+
+    fld('f-pini','Fecha de inicio','<input id="f-pini" name="fechaInicio" type="date" value="'+esc(pr?pr.fechaInicio:hoy())+'">')+
+    fld('f-pfin','Fecha de fin (opcional)','<input id="f-pfin" name="fechaFin" type="date" value="'+esc(pr?pr.fechaFin:'')+'">')+
+    fld('f-pmonto','Presupuesto (opcional)','<input id="f-pmonto" name="monto" type="number" min="0" step="any" inputmode="decimal" value="'+esc(monto)+'">')+
+    fld('f-pmon','Moneda','<select id="f-pmon" name="moneda">'+optHtml(MONEDAS.map(function(m){return [m,m];}),mon)+'</select>')+
+    '</div>'+
+    (pr?'<p class="note" style="margin:0">Titular actual: '+esc(nom(byP(pr.titularId)))+'. Para cambiarlo usa «Reasignar titular».</p>':
+      fld('f-ptit','Titular (director del proyecto)','<select id="f-ptit" name="titularId"><option value="">Elige una persona…</option>'+optHtml(personasOpts(true),'')+'</select>','Solo personas activas.'));
+  modal(pr?'Editar proyecto':'Nuevo proyecto',formShell('proyecto',{id:id,back:back},body,pr?'Guardar cambios':'Crear proyecto'),{id:pr?pr.id:''});
+}
+function formReasignar(id,back){
+  var pr=byY(id),tit=byP(pr.titularId);
+  var cand=DB.personas.filter(function(p){return p.estado==='activo'&&!(pr.estado==='activo'&&p.id===pr.titularId);}).map(function(p){return [p.id,nom(p)+' ('+p.id+')'];});
+  var body='<p style="margin:0">Proyecto <strong>'+esc(pr.nombre)+'</strong>. Titular actual: '+esc(nom(tit))+(tit&&tit.estado==='inactivo'?' (de baja)':'')+'.</p>'+
+    fld('f-nt','Nuevo titular','<select id="f-nt" name="nuevo"><option value="">Elige una persona…</option>'+optHtml(cand,'')+'</select>',
+      pr.estado==='activo'?'El titular actual pasa a ser miembro del equipo.':'El proyecto vuelve a estar activo.');
+  modal('Reasignar titular',formShell('reasignar',{id:id,back:back},body,'Reasignar titular'),{id:pr.id});
+}
+function formCerrar(id,modo,back){
+  var pr=byY(id),c=modo==='cierre';
+  var body='<p style="margin:0">'+(c?'Se cerrará':'Se cancelará')+' el proyecto <strong>'+esc(pr.nombre)+'</strong>. Después será de solo lectura.'+(c&&!pr.fechaFin?' Se registrará hoy como fecha de fin.':'')+'</p>'+
+    fld('f-cmot',c?'Motivo del cierre':'Motivo de la cancelación','<input id="f-cmot" name="motivo" maxlength="200" placeholder="'+(c?'Por ejemplo: Entrega final':'Por ejemplo: Cambio de prioridades')+'" autocomplete="off">');
+  modal(c?'Cerrar proyecto':'Cancelar proyecto',formShell('cerrar',{id:id,back:back,modo:modo},body,c?'Cerrar proyecto':'Cancelar proyecto',{danger:!c}),{id:pr.id});
+}
+function formParticipacion(pre,back){
+  pre=pre||{};
+  var body='<div class="grid2">'+
+    fld('f-pa-per','Persona','<select id="f-pa-per" name="personaId"><option value="">Elige una persona…</option>'+optHtml(personasOpts(true),pre.persona||'')+'</select>','Solo personas activas.')+
+    fld('f-pa-pro','Proyecto','<select id="f-pa-pro" name="proyectoId"><option value="">Elige un proyecto…</option>'+optHtml(proyectosOpts(true),pre.proyecto||'')+'</select>','Activos o pendientes de reasignación.')+
+    fld('f-pa-rol','Rol','<select id="f-pa-rol" name="rol">'+optHtml([['miembro','Miembro'],['observador','Observador']],'miembro')+'</select>','El director se define al reasignar el titular.')+
+    '</div>';
+  modal(pre.reincorporar?'Reincorporar al equipo':'Agregar integrante',formShell('participacion',{back:back},body,pre.reincorporar?'Reincorporar':'Agregar al equipo'));
+}
+function formRol(id,back){
+  var a=byA(id);
+  var body='<p style="margin:0"><strong>'+esc(nom(byP(a.personaId)))+'</strong> en <strong>'+esc(byY(a.proyectoId).nombre)+'</strong>.</p>'+
+    fld('f-rol','Nuevo rol','<select id="f-rol" name="rol">'+optHtml([['miembro','Miembro'],['observador','Observador']],a.rol)+'</select>');
+  modal('Cambiar rol',formShell('rol',{id:id,back:back},body,'Guardar rol'));
+}
+function formSalida(id,back){
+  var a=byA(id);
+  var body='<p style="margin:0">Dar de salida a <strong>'+esc(nom(byP(a.personaId)))+'</strong> del proyecto <strong>'+esc(byY(a.proyectoId).nombre)+'</strong>. Su participación queda como histórica.</p>'+
+    fld('f-smot','Motivo (opcional)','<input id="f-smot" name="motivo" maxlength="200" autocomplete="off">');
+  modal('Dar de salida del equipo',formShell('salida',{id:id,back:back},body,'Dar de salida',{danger:true}));
+}
+
+var FORMS={
+  persona:function(d,ds){
+    var datos={nombre:d.nombre,apellidos:d.apellidos,email:d.email,telefono:d.telefono||'',departamento:d.departamento||''};
+    var er=validaPersona(datos,ds.id||null);if(er.length)throw new VErr(er);
+    if(ds.id){actualizarPersona(ds.id,datos);return 'Cambios guardados.';}
+    var p=crearPersona(datos);return 'Persona dada de alta: '+nom(p)+' ('+p.id+').';
+  },
+  baja:function(d,ds){
+    var n=planBaja(ds.id).length;bajaPersona(ds.id,d.motivo);
+    return 'Baja registrada. '+n+(n===1?' participación pasó':' participaciones pasaron')+' a histórico.';
+  },
+  proyecto:function(d,ds){
+    var datos={nombre:d.nombre,descripcion:d.descripcion,fechaInicio:d.fechaInicio,fechaFin:d.fechaFin||'',monto:d.monto||'',moneda:d.moneda||'USD'};
+    var er=validaProyecto(datos);
+    if(!ds.id){var t=byP(d.titularId);if(!t||t.estado!=='activo')er.push('Elige a la persona titular (debe estar activa).');}
+    if(er.length)throw new VErr(er);
+    if(ds.id){actualizarProyecto(ds.id,datos);return 'Cambios guardados.';}
+    var pr=crearProyecto(datos,d.titularId);return 'Proyecto creado: '+pr.nombre+' ('+pr.id+').';
+  },
+  reasignar:function(d,ds){if(!d.nuevo)throw new VErr(['Elige al nuevo titular.']);reasignarProyecto(ds.id,d.nuevo);return 'Titular reasignado a '+nom(byP(d.nuevo))+'.';},
+  cerrar:function(d,ds){cerrarProyecto(ds.id,d.motivo,ds.modo);return ds.modo==='cierre'?'Proyecto cerrado.':'Proyecto cancelado.';},
+  participacion:function(d){
+    if(!d.personaId||!d.proyectoId)throw new VErr(['Elige la persona y el proyecto.']);
+    altaParticipacion(d.personaId,d.proyectoId,d.rol);return 'Integrante agregado al equipo.';
+  },
+  rol:function(d,ds){cambiarRol(ds.id,d.rol);return 'Rol actualizado.';},
+  salida:function(d,ds){salidaParticipacion(ds.id,d.motivo);return 'Salida registrada.';}
+};
+
+/* ===================== Detalles ===================== */
+function verPersona(id){
+  var p=byP(id);if(!p)return;
+  var pas=DB.participaciones.filter(function(a){return a.personaId===id;});
+  var filas=pas.map(function(a){var pr=byY(a.proyectoId);return {dim:a.estado==='historico',cells:[
+    '<button class="link" data-act="ver-proyecto" data-id="'+esc(pr.id)+'">'+esc(pr.nombre)+'</button>',badge(pr.estado),rolHtml(a.rol),badge(a.estado)]};});
+  modal(nom(p),
+    '<dl class="kv"><dt>Correo</dt><dd>'+esc(p.email)+'</dd><dt>Teléfono</dt><dd>'+esc(p.telefono||'—')+'</dd><dt>Departamento</dt><dd>'+esc(p.departamento||'—')+'</dd></dl>'+
+    '<h3 class="sub">Participaciones</h3>'+tabla(['Proyecto','Estado del proyecto','Rol','Participación'],filas,{vacio:'Sin participaciones.'})+
+    '<h3 class="sub">Historial</h3>'+histHtml(p.historial)+
+    '<div class="foot"><button class="btn" data-act="editar-persona" data-id="'+esc(id)+'" data-back="persona:'+esc(id)+'">Editar</button>'+
+    (p.estado==='activo'?'<button class="btn danger" data-act="baja-persona" data-id="'+esc(id)+'" data-back="persona:'+esc(id)+'">Dar de baja</button>':'<button class="btn primary" data-act="reactivar-persona" data-id="'+esc(id)+'" data-back="persona:'+esc(id)+'">Reactivar</button>')+'</div>',
+    {wide:true,badge:badge(p.estado),id:p.id});
+}
+function verProyecto(id){
+  var pr=byY(id);if(!pr)return;
+  var open=abierto(pr),tit=byP(pr.titularId);
+  var eq=DB.participaciones.filter(function(a){return a.proyectoId===id;}).map(function(a){
+    var per=byP(a.personaId),acc='';
+    if(open){
+      if(a.estado==='activo'&&a.rol!=='director')acc='<button class="btn sm" data-act="cambiar-rol" data-id="'+a.id+'" data-back="proyecto:'+esc(id)+'">Cambiar rol</button><button class="btn sm danger" data-act="salida" data-id="'+a.id+'" data-back="proyecto:'+esc(id)+'">Dar de salida</button>';
+      else if(a.estado==='historico'&&per.estado==='activo')acc='<button class="btn sm" data-act="reincorporar" data-id="'+a.id+'" data-back="proyecto:'+esc(id)+'">Reincorporar</button>';
+    }
+    return {dim:a.estado==='historico',cells:['<button class="link" data-act="ver-persona" data-id="'+esc(per.id)+'">'+esc(nom(per))+'</button>',rolHtml(a.rol),badge(a.estado),'<span class="actions">'+acc+'</span>']};
+  });
+  modal(pr.nombre,
+    '<p style="margin:0 0 14px">'+esc(pr.descripcion)+'</p>'+
+    (pr.estado==='pendiente_reasignacion'?'<div class="alert warn" style="margin-bottom:14px"><span>Sin titular activo. Usa «Reasignar titular» para continuar.</span></div>':'')+
+    (!open?'<p class="note" style="margin:0 0 14px">Proyecto '+esc(LBL[pr.estado])+': solo lectura.</p>':'')+
+    '<dl class="kv"><dt>Titular</dt><dd><button class="link" data-act="ver-persona" data-id="'+esc(pr.titularId)+'">'+esc(nom(tit))+'</button>'+(tit&&tit.estado==='inactivo'?' <span class="muted">(de baja)</span>':'')+'</dd>'+
+    '<dt>Inicio</dt><dd class="mono">'+esc(pr.fechaInicio)+'</dd><dt>Fin</dt><dd class="mono">'+esc(pr.fechaFin||'No definida')+(vencido(pr)?' <span class="badge bad">vencido</span>':'')+'</dd>'+
+    '<dt>Actualizado</dt><dd class="mono">'+esc(pr.ultimaActualizacion)+'</dd><dt>Presupuesto</dt><dd class="mono">'+esc(fmtMonto(pr))+'</dd></dl>'+
+    '<h3 class="sub">Equipo</h3>'+tabla(['Persona','Rol','Participación',''],eq,{vacio:'Sin participaciones.'})+
+    (open?'<div style="margin-top:10px"><button class="btn sm" data-act="nueva-participacion" data-proyecto="'+esc(id)+'" data-back="proyecto:'+esc(id)+'">Agregar integrante</button></div>':'')+
+    '<h3 class="sub">Historial</h3>'+histHtml(pr.historial)+
+    (open?'<div class="foot">'+
+      '<button class="btn" data-act="editar-proyecto" data-id="'+esc(id)+'" data-back="proyecto:'+esc(id)+'">Editar</button>'+
+      '<button class="btn" data-act="reasignar" data-id="'+esc(id)+'" data-back="proyecto:'+esc(id)+'">Reasignar titular</button>'+
+      '<button class="btn" data-act="cerrar-proyecto" data-id="'+esc(id)+'" data-back="proyecto:'+esc(id)+'">Cerrar proyecto</button>'+
+      '<button class="btn danger" data-act="anular-proyecto" data-id="'+esc(id)+'" data-back="proyecto:'+esc(id)+'">Cancelar proyecto</button></div>':''),
+    {wide:true,badge:badge(pr.estado),id:pr.id});
+}
+
+/* ===================== Listados ===================== */
+var LISTAS={
+  personas:function(){
+    var f=ui.filtros.personas,q=f.q.toLowerCase();
+    var rows=DB.personas.filter(function(p){
+      return (!f.estado||p.estado===f.estado)&&(!q||[p.id,p.nombre,p.apellidos,p.email,p.telefono,p.departamento].join(' ').toLowerCase().indexOf(q)>=0);
+    }).map(function(p){
+      var n=activasDe(p.id).filter(function(a){return abierto(byY(a.proyectoId));}).length;
+      return {dim:p.estado==='inactivo',cells:[
+        '<strong>'+esc(nom(p))+'</strong><span class="sec">'+esc(p.email)+' · <span class="mono">'+esc(p.id)+'</span></span>',
+        esc(p.departamento||'—'),'<span class="mono">'+esc(p.telefono||'—')+'</span>',badge(p.estado),'<span class="mono">'+n+'</span>',
+        '<span class="actions"><button class="btn sm" data-act="ver-persona" data-id="'+esc(p.id)+'">Ver</button><button class="btn sm" data-act="editar-persona" data-id="'+esc(p.id)+'">Editar</button>'+
+        (p.estado==='activo'?'<button class="btn sm danger" data-act="baja-persona" data-id="'+esc(p.id)+'">Dar de baja</button>':'<button class="btn sm" data-act="reactivar-persona" data-id="'+esc(p.id)+'">Reactivar</button>')+'</span>']};
+    });
+    return '<div class="count">'+rows.length+' de '+DB.personas.length+' personas</div>'+tabla(['Persona','Departamento','Teléfono','Estado','Proyectos activos',''],rows,{vacio:'Ninguna persona coincide con los filtros.'});
+  },
+  proyectos:function(){
+    var f=ui.filtros.proyectos,q=f.q.toLowerCase();
+    var rows=DB.proyectos.filter(function(p){
+      return (!f.estado||p.estado===f.estado)&&(!q||[p.id,p.nombre,p.descripcion,nom(byP(p.titularId))].join(' ').toLowerCase().indexOf(q)>=0);
+    }).map(function(p){
+      var eq=DB.participaciones.filter(function(a){return a.proyectoId===p.id&&a.estado==='activo';}).length;
+      return {dim:!abierto(p),cells:[
+        '<strong>'+esc(p.nombre)+'</strong> <span class="mono muted">'+esc(p.id)+'</span><span class="desc">'+esc(p.descripcion)+'</span>',
+        esc(nom(byP(p.titularId))),badge(p.estado),
+        '<span class="mono">'+esc(p.fechaInicio)+' → '+esc(p.fechaFin||'sin fin')+'</span>'+(vencido(p)?' <span class="badge bad">vencido</span>':''),
+        '<span class="mono">'+esc(fmtMonto(p))+'</span>','<span class="mono">'+eq+'</span>',
+        '<span class="actions"><button class="btn sm" data-act="ver-proyecto" data-id="'+esc(p.id)+'">Ver</button>'+(abierto(p)?'<button class="btn sm" data-act="editar-proyecto" data-id="'+esc(p.id)+'">Editar</button>':'')+
+        (p.estado==='pendiente_reasignacion'?'<button class="btn sm primary" data-act="reasignar" data-id="'+esc(p.id)+'">Reasignar titular</button>':'')+'</span>']};
+    });
+    return '<div class="count">'+rows.length+' de '+DB.proyectos.length+' proyectos</div>'+tabla(['Proyecto','Titular','Estado','Fechas','Presupuesto','Equipo',''],rows,{vacio:'Ningún proyecto coincide con los filtros.'});
+  }
+};
+function refreshList(k){var el=$('#lista-'+k);if(el)el.innerHTML=LISTAS[k]();}
+
+/* ===================== Vistas ===================== */
+function vistaPanel(){
+  var pAct=DB.personas.filter(function(p){return p.estado==='activo';}).length;
+  var yAct=DB.proyectos.filter(function(p){return p.estado==='activo';}).length;
+  var pend=DB.proyectos.filter(function(p){return p.estado==='pendiente_reasignacion';});
+  var venc=DB.proyectos.filter(vencido);
+  var sumas={};DB.proyectos.filter(abierto).forEach(function(p){if(p.presupuesto)sumas[p.presupuesto.moneda]=(sumas[p.presupuesto.moneda]||0)+Number(p.presupuesto.monto);});
+  var presu=Object.keys(sumas).map(function(m){return m+' '+sumas[m].toLocaleString('es-MX');}).join(' · ')||'sin presupuestos definidos';
+  var integ=validarNegocio(DB).filter(function(x){return x.nivel==='error';});
+  var al=[];
+  pend.forEach(function(p){al.push('<div class="alert warn"><span><strong>'+esc(p.nombre)+'</strong> no tiene titular activo ('+esc(nom(byP(p.titularId)))+' está de baja).</span><button class="btn sm" data-act="reasignar" data-id="'+esc(p.id)+'">Reasignar titular</button></div>');});
+  venc.forEach(function(p){al.push('<div class="alert"><span><strong>'+esc(p.nombre)+'</strong> debía terminar el <span class="mono">'+esc(p.fechaFin)+'</span> (hace '+diasEntre(p.fechaFin,hoy())+' días) y sigue '+esc(LBL[p.estado])+'.</span><button class="btn sm" data-act="ver-proyecto" data-id="'+esc(p.id)+'">Ver proyecto</button></div>');});
+  if(integ.length)al.push('<div class="alert bad"><span>'+integ.length+' inconsistencia(s) en los datos.</span><button class="btn sm" data-act="ir-integridad">Ver detalle</button></div>');
+  if(!al.length)al.push('<div class="alert ok"><span>Todo en orden: no hay proyectos pendientes, vencidos ni inconsistencias.</span></div>');
+  var porEst=['activo','pendiente_reasignacion','cerrado','cancelado'].map(function(e){return {l:LBL[e],c:e,v:DB.proyectos.filter(function(p){return p.estado===e;}).length};});
+  return '<div class="stack">'+
+    '<div class="stats">'+
+      '<div class="stat"><div class="n">'+pAct+'<span class="muted" style="font-size:16px"> / '+DB.personas.length+'</span></div><div class="l">Personas activas</div></div>'+
+      '<div class="stat"><div class="n">'+yAct+'<span class="muted" style="font-size:16px"> / '+DB.proyectos.length+'</span></div><div class="l">Proyectos activos</div></div>'+
+      '<div class="stat'+(pend.length?' warn':'')+'"><div class="n">'+pend.length+'</div><div class="l">Pendientes de reasignación</div></div>'+
+      '<div class="stat'+(venc.length?' warn':'')+'"><div class="n">'+venc.length+'</div><div class="l">Proyectos vencidos</div></div>'+
+    '</div>'+
+    '<div class="card"><div class="cardhead"><h2>Requiere atención</h2><div class="row"><button class="btn primary sm" data-act="nueva-persona">Nueva persona</button><button class="btn primary sm" data-act="nuevo-proyecto">Nuevo proyecto</button></div></div><div class="alerts">'+al.join('')+'</div></div>'+
+    '<div class="card"><h2>Proyectos por estado</h2>'+bars(porEst)+'<p class="note">Presupuesto en curso: '+esc(presu)+'.</p></div>'+
+  '</div>';
+}
+function vistaPersonas(){
+  var f=ui.filtros.personas;
+  return '<div class="card"><div class="cardhead"><h2>Personas</h2><button class="btn primary" data-act="nueva-persona">Nueva persona</button></div>'+
+    '<div class="toolbar">'+fld('fp-q','Buscar','<input id="fp-q" data-filter="personas.q" type="search" placeholder="Nombre, correo, departamento…" value="'+esc(f.q)+'">')+
+    fld('fp-e','Estado','<select id="fp-e" data-filter="personas.estado"><option value="">Todos</option>'+optHtml([['activo','Activo'],['inactivo','Inactivo']],f.estado)+'</select>')+'</div>'+
+    '<div id="lista-personas">'+LISTAS.personas()+'</div></div>';
+}
+function vistaProyectos(){
+  var f=ui.filtros.proyectos;
+  return '<div class="card"><div class="cardhead"><h2>Proyectos</h2><button class="btn primary" data-act="nuevo-proyecto">Nuevo proyecto</button></div>'+
+    '<div class="toolbar">'+fld('fy-q','Buscar','<input id="fy-q" data-filter="proyectos.q" type="search" placeholder="Nombre, descripción, titular…" value="'+esc(f.q)+'">')+
+    fld('fy-e','Estado','<select id="fy-e" data-filter="proyectos.estado"><option value="">Todos</option>'+optHtml(ESTADOS_PROY.map(function(e){return [e,LBL[e]];}),f.estado)+'</select>')+'</div>'+
+    '<div id="lista-proyectos">'+LISTAS.proyectos()+'</div></div>';
+}
+
+/* ---------- Consultas ---------- */
+var CONSULTAS=[
+  {id:'proy-persona',t:'Proyectos en los que participa una persona',param:'persona',run:function(pid){
+    return {cols:['Proyecto','Estado del proyecto','Rol','Participación'],rows:DB.participaciones.filter(function(a){return a.personaId===pid;}).map(function(a){var pr=byY(a.proyectoId);return [esc(pr.nombre),badge(pr.estado),rolHtml(a.rol),badge(a.estado)];})};}},
+  {id:'equipo',t:'Integrantes de un proyecto',param:'proyecto',run:function(yid){
+    return {cols:['Persona','Departamento','Rol','Participación'],rows:DB.participaciones.filter(function(a){return a.proyectoId===yid;}).map(function(a){var p=byP(a.personaId);return [esc(nom(p)),esc(p.departamento||'—'),rolHtml(a.rol),badge(a.estado)];})};}},
+  {id:'titular',t:'Proyectos de los que una persona es titular',param:'persona',run:function(pid){
+    return {cols:['Proyecto','Estado','Inicio','Fin','Presupuesto'],rows:DB.proyectos.filter(function(p){return p.titularId===pid;}).map(function(p){return [esc(p.nombre),badge(p.estado),esc(p.fechaInicio),esc(p.fechaFin||'No definida'),esc(fmtMonto(p))];})};}},
+  {id:'sin-proy',t:'Personas activas sin proyectos en curso',run:function(){
+    return {cols:['Persona','Departamento','Correo'],rows:DB.personas.filter(function(p){return p.estado==='activo'&&!activasDe(p.id).some(function(a){return abierto(byY(a.proyectoId));});}).map(function(p){return [esc(nom(p)),esc(p.departamento||'—'),esc(p.email)];})};}},
+  {id:'incompletos',t:'Proyectos sin fecha de fin o sin presupuesto',run:function(){
+    return {cols:['Proyecto','Estado','Falta'],rows:DB.proyectos.filter(function(p){return !p.fechaFin||!p.presupuesto;}).map(function(p){return [esc(p.nombre),badge(p.estado),esc([!p.fechaFin?'fecha de fin':'',!p.presupuesto?'presupuesto':''].filter(Boolean).join(' y '))];})};}},
+  {id:'vencidos',t:'Proyectos vencidos que siguen abiertos',run:function(){
+    return {cols:['Proyecto','Titular','Estado','Fin','Días de atraso'],rows:DB.proyectos.filter(vencido).map(function(p){return [esc(p.nombre),esc(nom(byP(p.titularId))),badge(p.estado),esc(p.fechaFin),String(diasEntre(p.fechaFin,hoy()))];})};}},
+  {id:'historicas',t:'Participaciones históricas',run:function(){
+    return {cols:['Persona','Proyecto','Rol que tenía'],rows:DB.participaciones.filter(function(a){return a.estado==='historico';}).map(function(a){return [esc(nom(byP(a.personaId))),esc(byY(a.proyectoId).nombre),rolHtml(a.rol)];})};}},
+  {id:'integridad',t:'Revisión de integridad de los datos',run:function(){
+    var h=validarEsquema(DB).map(function(t){return ['<span class="badge bad">error</span>',esc(t)];}).concat(validarNegocio(DB).map(function(x){return ['<span class="badge '+(x.nivel==='error'?'bad':'warn')+'">'+x.nivel+'</span>',esc(x.texto)];}));
+    return {cols:['Nivel','Hallazgo'],rows:h,vacio:'Sin hallazgos: los datos son consistentes.'};}}
+];
+function consultaHtml(){
+  var c=CONSULTAS.find(function(x){return x.id===ui.consulta.id;})||CONSULTAS[0];
+  var arg=ui.consulta.arg;
+  if(c.param==='persona'&&!byP(arg))arg=DB.personas[0]?DB.personas[0].id:'';
+  if(c.param==='proyecto'&&!byY(arg))arg=DB.proyectos[0]?DB.proyectos[0].id:'';
+  ui.consulta.arg=arg;
+  var res=c.run(arg);
+  var par=c.param==='persona'?fld('c-arg','Persona','<select id="c-arg" data-q="arg">'+optHtml(personasOpts(false),arg)+'</select>'):
+          c.param==='proyecto'?fld('c-arg','Proyecto','<select id="c-arg" data-q="arg">'+optHtml(proyectosOpts(false),arg)+'</select>'):'';
+  return '<div class="toolbar">'+fld('c-id','Consulta','<select id="c-id" data-q="id">'+optHtml(CONSULTAS.map(function(x){return [x.id,x.t];}),c.id)+'</select>')+par+'</div>'+
+    '<div class="count">'+res.rows.length+' resultado(s)</div>'+tabla(res.cols,res.rows.map(function(r){return {cells:r};}),{vacio:res.vacio||'La consulta no devolvió resultados.'});
+}
+function vistaConsultas(){
+  return '<div class="card"><h2>Consultas</h2><div id="consulta-box">'+consultaHtml()+'</div></div>';
+}
+
+var VISTAS={panel:vistaPanel,personas:vistaPersonas,proyectos:vistaProyectos,consultas:vistaConsultas};
+var NAV=[['panel','Panel'],['personas','Personas'],['proyectos','Proyectos'],['consultas','Consultas']];
+function render(){
+  $('#tabs').innerHTML=NAV.map(function(n){return '<button data-act="nav" data-view="'+n[0]+'"'+(n[0]===ui.view?' aria-current="page"':'')+'>'+n[1]+'</button>';}).join('');
+  $('#main').innerHTML=VISTAS[ui.view]();
+}
+
+/* ===================== Eventos ===================== */
+function importarArchivo(){
+  var inp = document.getElementById('file-import');
+  var file = inp.files && inp.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    var texto = ev.target.result;
+    var r;
+    try{ r = parseXML(texto); }
+    catch(err){ toast('El archivo no se pudo leer como XML.'); return; }
+
+    if(r.errors && r.errors.length){
+      modal('Errores al importar',
+        '<p>El archivo tiene <strong>'+r.errors.length+'</strong> problema(s):</p>'+
+        '<ul class="impact">'+r.errors.map(function(e){return '<li>'+esc(e)+'</li>';}).join('')+'</ul>'+
+        '<div class="foot"><button type="button" class="btn" data-act="cerrar-ventana">Cerrar</button></div>',
+        {wide:true});
+      return;
+    }
+
+    var problemas = validarNegocio(r.db);
+    if(problemas.length){
+      modal('Advertencias al importar',
+        '<p>El XML es válido en estructura pero tiene <strong>'+problemas.length+'</strong> aviso(s):</p>'+
+        '<ul class="impact">'+problemas.map(function(p){return '<li>['+esc(p.nivel)+'] '+esc(p.texto)+'</li>';}).join('')+'</ul>'+
+        '<p class="note">Puedes continuar; los avisos se verán en el panel.</p>'+
+        '<div class="foot"><button type="button" class="btn" data-act="cerrar-ventana">Cancelar</button>'+
+        '<button type="button" class="btn primary" data-act="confirmar-importacion">Importar de todas formas</button></div>',
+        {wide:true});
+      ACT._importPendiente = r.db;
+      return;
+    }
+
+    aplicarImportacion(r.db);
+  };
+  reader.onerror = function(){ toast('No se pudo leer el archivo.'); };
+  reader.readAsText(file, 'UTF-8');
+}
+
+var ACT={
+  nav:function(d){ui.view=d.view;render();try{window.scrollTo(0,0);}catch(e){}},
+  'cerrar-ventana':function(){closeModal();},
+  volver:function(d){var b=backFn(d.back);if(b)b();else closeModal();},
+  'nueva-persona':function(){formPersona();},
+  'ver-persona':function(d){verPersona(d.id);},
+  'editar-persona':function(d){formPersona(d.id,d.back);},
+  'baja-persona':function(d){formBaja(d.id,d.back);},
+  'reactivar-persona':function(d){
+    try{
+      var p=byP(d.id);reactivarPersona(d.id);persist();render();
+      toast(nom(p)+' fue reactivada. Sus participaciones históricas no se restauran.');
+      var b=backFn(d.back);if(b)b();
+    }catch(e){toast(e.message);}
+  },
+  'importar-xml': function(){
+  var inp = document.getElementById('file-import');
+  inp.value = '';
+  inp.click();
+},
+'archivo-seleccionado': function(){
+  importarArchivo();
+},
+  'nuevo-proyecto':function(){formProyecto();},
+  'ver-proyecto':function(d){verProyecto(d.id);},
+  'editar-proyecto':function(d){formProyecto(d.id,d.back);},
+  reasignar:function(d){formReasignar(d.id,d.back);},
+  'cerrar-proyecto':function(d){formCerrar(d.id,'cierre',d.back);},
+  'anular-proyecto':function(d){formCerrar(d.id,'cancelacion',d.back);},
+  'nueva-participacion':function(d){formParticipacion({proyecto:d.proyecto},d.back);},
+  'cambiar-rol':function(d){formRol(d.id,d.back);},
+  salida:function(d){formSalida(d.id,d.back);},
+  reincorporar:function(d){var a=byA(d.id);formParticipacion({persona:a.personaId,proyecto:a.proyectoId,reincorporar:true},d.back);},
+  'ir-integridad':function(){ui.view='consultas';ui.consulta={id:'integridad',arg:''};render();},
+  'importar-xml': function(){
+  var inp = document.getElementById('file-import');
+  inp.value = '';          // permite reimportar el mismo archivo
+  inp.click();             // abre el diálogo de archivos
+},
+
+'archivo-seleccionado': function(){
+  var inp = document.getElementById('file-import');
+  var file = inp.files && inp.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    var texto = ev.target.result;
+    var r;
+    try{ r = parseXML(texto); }
+    catch(err){ toast('El archivo no se pudo leer como XML.'); return; }
+
+    if(r.errors && r.errors.length){
+      modal('Errores al importar',
+        '<p>El archivo tiene <strong>'+r.errors.length+'</strong> problema(s):</p>'+
+        '<ul class="impact">'+r.errors.map(function(e){return '<li>'+esc(e)+'</li>';}).join('')+'</ul>'+
+        '<div class="foot"><button type="button" class="btn" data-act="cerrar-ventana">Cerrar</button></div>',
+        {wide:true});
+      return;
+    }
+
+    // Validación de negocio adicional
+    var problemas = validarNegocio(r.db);
+    if(problemas.length){
+      modal('Advertencias al importar',
+        '<p>El XML es válido en estructura pero tiene <strong>'+problemas.length+'</strong> aviso(s):</p>'+
+        '<ul class="impact">'+problemas.map(function(p){return '<li>['+esc(p.nivel)+'] '+esc(p.texto)+'</li>';}).join('')+'</ul>'+
+        '<p class="note">Puedes continuar; los avisos se verán en el panel.</p>'+
+        '<div class="foot"><button type="button" class="btn" data-act="cerrar-ventana">Cancelar</button>'+
+        '<button type="button" class="btn primary" data-act="confirmar-importacion">Importar de todas formas</button></div>',
+        {wide:true});
+      ACT._importPendiente = r.db;   // guarda temporalmente
+      return;
+    }
+
+    aplicarImportacion(r.db);
+  };
+  reader.onerror = function(){ toast('No se pudo leer el archivo.'); };
+  reader.readAsText(file, 'UTF-8');
+},
+
+'confirmar-importacion': function(){
+  if(ACT._importPendiente){
+    aplicarImportacion(ACT._importPendiente);
+    ACT._importPendiente = null;
+  }
+},
+  'reset-ejemplo':function(){
+    modal('Restablecer datos de ejemplo','<p style="margin:0">Se perderán los cambios hechos en este navegador y volverán los datos del ejercicio original.</p>'+
+      '<div class="foot"><button type="button" class="btn" data-act="cerrar-ventana">Volver</button><button type="button" class="btn danger" data-act="confirmar-reset">Restablecer datos</button></div>');
+  },
+  'confirmar-reset':function(){DB=seed();persist();closeModal();render();toast('Datos de ejemplo restablecidos.');},
+  'exportar-xml': function(){
+  var xml = toXML(DB);
+  var blob = new Blob([xml], {type:'application/xml;charset=utf-8'});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'proyecto.xml';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('XML exportado como proyecto.xml');
+},
+
+};
+function aplicarImportacion(nuevaDB){
+  DB = nuevaDB;
+  persist();
+  closeModal();
+  render();
+  toast('Datos importados correctamente.');
+}
+/* Cerrar al pulsar el fondo: solo si el clic empezó y terminó en el fondo (no al seleccionar texto dentro de la ventana). */
+document.addEventListener('mousedown',function(e){downEnOverlay=!!(e.target.classList&&e.target.classList.contains('overlay'));});
+document.addEventListener('click',function(e){
+  var t=e.target;
+  if(t.classList&&t.classList.contains('overlay')&&downEnOverlay){closeModal();return;}
+  var b=t.closest&&t.closest('[data-act]');if(!b)return;
+  var fn=ACT[b.dataset.act];if(fn)fn(b.dataset,b,e);   /* sin preventDefault: los botones de envío deben enviar su formulario */
+});
+document.addEventListener('change', function(e){
+  if(e.target && e.target.id === 'file-import'){
+    importarArchivo();
+  }
+});
+document.addEventListener('input',function(e){
+  var t=e.target,f=t.dataset&&t.dataset.filter;
+  if(f){var p=f.split('.');ui.filtros[p[0]][p[1]]=t.value;refreshList(p[0]);return;}
+  var q=t.dataset&&t.dataset.q;
+  if(q){
+    ui.consulta[q]=t.value;if(q==='id')ui.consulta.arg='';
+    $('#consulta-box').innerHTML=consultaHtml();
+    var el=$(q==='id'?'#c-id':'#c-arg');if(el)el.focus();
+  }
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&$('.overlay'))closeModal();
+});
+document.addEventListener('submit',function(e){
+  var f=e.target.closest('form[data-form]');if(!f)return;
+  e.preventDefault();
+  var d={};new FormData(f).forEach(function(v,k){d[k]=typeof v==='string'?v.trim():v;});
+  try{
+    var msg=FORMS[f.dataset.form](d,f.dataset);
+    persist();render();toast(msg);
+    var b=backFn(f.dataset.back);if(b)b();else closeModal();
+  }catch(err){
+    var box=f.querySelector('.form-err'),list=err.list||[err.message||'No se pudo guardar.'];
+    box.innerHTML='<ul>'+list.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>';box.hidden=false;
+  }
+});
+
+/* ===================== Sincronización con el servidor ===================== */
+var _ultimoXmlServidor = null;
+
+function sincronizarConServidor(){
+  if(!window.fetch) return;
+  fetch('/data/proyecto.xml', {cache: 'no-store'})
+    .then(function(r){
+      if(!r.ok) return null;
+      return r.text();
+    })
+    .then(function(xml){
+      if(!xml) return;
+      var limpio = xml.trim();
+      if(_ultimoXmlServidor === null){
+        _ultimoXmlServidor = limpio;
+        return;
+      }
+      if(limpio === _ultimoXmlServidor) return;
+      _ultimoXmlServidor = limpio;
+
+      // El XML del servidor cambió
+      var local = toXML(DB).trim();
+      if(local === limpio) return;  // ya estábamos sincronizados
+
+      var r = parseXML(xml);
+      if(!r.db || r.errors.length){
+        console.warn('XML del servidor no se pudo parsear; se ignora.');
+        return;
+      }
+
+      DB = r.db;
+      try{ localStorage.setItem(KEY, xml); }catch(e){}
+      render();
+      toast('Datos actualizados desde el servidor.');
+    })
+    .catch(function(){ /* servidor caído → silencio */ });
+}
+
+// Comprobar cada 3 segundos
+setInterval(sincronizarConServidor, 3000);
+
+// Primera llamada tras 1s de arrancar
+setTimeout(sincronizarConServidor, 1000);
+
+/* ===================== Arranque ===================== */
+render();
+
+})();
+</script>
+</body>
+</html>
