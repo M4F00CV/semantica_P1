@@ -1,0 +1,494 @@
+<html lang="es">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de personas y proyectos</title>
+<style>
+                * {
+                    box-sizing: border-box;
+                }
+
+                body {
+                    margin: 0;
+                    padding: 30px;
+                    font-family: Arial, sans-serif;
+                    background: #f3f6fb;
+                    color: #263247;
+                }
+
+                header {
+                    background: #172b4d;
+                    color: white;
+                    padding: 28px;
+                    border-radius: 12px;
+                    margin-bottom: 25px;
+                }
+
+                header h1 {
+                    margin: 0 0 8px;
+                }
+
+                header p {
+                    margin: 0;
+                    color: #d5dfef;
+                }
+
+                .resumen {
+                    display: grid;
+                    grid-template-columns:
+                        repeat(auto-fit, minmax(180px, 1fr));
+                    gap: 16px;
+                    margin-bottom: 30px;
+                }
+
+                .tarjeta {
+                    background: white;
+                    padding: 22px;
+                    border-radius: 10px;
+                    border: 1px solid #e1e7f0;
+                }
+
+                .tarjeta h3 {
+                    margin: 0 0 12px;
+                    font-size: 14px;
+                    color: #63718a;
+                }
+
+                .numero {
+                    font-size: 30px;
+                    font-weight: bold;
+                    color: #2457a7;
+                }
+
+                section {
+                    background: white;
+                    padding: 24px;
+                    border-radius: 12px;
+                    margin-bottom: 28px;
+                    overflow-x: auto;
+                }
+
+                h2 {
+                    margin-top: 0;
+                    color: #172b4d;
+                }
+
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    min-width: 650px;
+                }
+
+                th, td {
+                    text-align: left;
+                    padding: 13px;
+                    border-bottom: 1px solid #e8edf4;
+                    vertical-align: top;
+                }
+
+                th {
+                    background: #f5f7fb;
+                    color: #52627b;
+                    font-size: 13px;
+                }
+
+                td {
+                    font-size: 14px;
+                }
+
+                .estado {
+                    display: inline-block;
+                    padding: 5px 9px;
+                    border-radius: 20px;
+                    font-size: 12px;
+                    font-weight: bold;
+                }
+
+                .activo {
+                    color: #187347;
+                    background: #dff6e9;
+                }
+
+                .inactivo,
+                .cancelado {
+                    color: #a12e35;
+                    background: #fde5e6;
+                }
+
+                .cerrado,
+                .historico {
+                    color: #52627b;
+                    background: #e9edf3;
+                }
+
+                .pendiente_reasignacion {
+                    color: #8b5a00;
+                    background: #fff0cc;
+                }
+
+                .director {
+                    color: #254fa1;
+                    font-weight: bold;
+                }
+
+                .descripcion {
+                    min-width: 220px;
+                    max-width: 350px;
+                }
+
+                footer {
+                    text-align: center;
+                    color: #718096;
+                    padding: 12px;
+                    font-size: 13px;
+                }
+
+                @media (max-width: 600px) {
+                    body {
+                        padding: 12px;
+                    }
+
+                    header, section {
+                        padding: 18px;
+                    }
+                }
+            </style>
+</head>
+<body>
+<header><h1>Panel de gestión</h1>
+<p>Directorio de personas, proyectos y participaciones</p></header><div class="resumen">
+<div class="tarjeta">
+<h3>Total de personas</h3>
+<div class="numero">13</div>
+</div>
+<div class="tarjeta">
+<h3>Personas activas</h3>
+<div class="numero">10</div>
+</div>
+<div class="tarjeta">
+<h3>Total de proyectos</h3>
+<div class="numero">6</div>
+</div>
+<div class="tarjeta">
+<h3>Proyectos activos</h3>
+<div class="numero">3</div>
+</div>
+<div class="tarjeta">
+<h3>Pendientes de reasignación</h3>
+<div class="numero">1</div>
+</div>
+</div>
+<section><h2>Directorio de personas</h2>
+<table>
+<thead><tr>
+<th>ID</th>
+<th>Nombre completo</th>
+<th>Correo electrónico</th>
+<th>Teléfono</th>
+<th>Departamento</th>
+<th>Estado</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>p001</td>
+<td>Ana García López</td>
+<td>ana.garcia@ejemplo.com</td>
+<td>555-1001</td>
+<td>Desarrollo</td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>p002</td>
+<td>Luis Martínez Ruiz</td>
+<td>luis.martinez@ejemplo.com</td>
+<td>555-1002</td>
+<td>Desarrollo</td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>p003</td>
+<td>María Fernández Soto</td>
+<td>maria.fernandez@ejemplo.com</td>
+<td>555-1003</td>
+<td>Diseño</td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>p004</td>
+<td>Carlos Ruiz Navarro</td>
+<td>carlos.ruiz@ejemplo.com</td>
+<td>555-1004</td>
+<td>QA</td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>p005</td>
+<td>Elena Sánchez Vidal</td>
+<td>elena.sanchez@ejemplo.com</td>
+<td>555-1005</td>
+<td>Gestión</td>
+<td><span class="estado inactivo">inactivo</span></td>
+</tr>
+<tr>
+<td>p006</td>
+<td>Marco Vazquez</td>
+<td>a@a.com</td>
+<td></td>
+<td></td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>p007</td>
+<td>Marco cadena</td>
+<td>correo@a.com</td>
+<td></td>
+<td></td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>p008</td>
+<td>Alejandro Sans</td>
+<td>alejandro@correo.com</td>
+<td>2211887956</td>
+<td>QA</td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>p009</td>
+<td>CLI Test</td>
+<td>cli@x.com</td>
+<td></td>
+<td></td>
+<td><span class="estado inactivo">inactivo</span></td>
+</tr>
+<tr>
+<td>p010</td>
+<td>Sync Test</td>
+<td>sync@x.com</td>
+<td></td>
+<td></td>
+<td><span class="estado inactivo">inactivo</span></td>
+</tr>
+<tr>
+<td>p011</td>
+<td>Erick Gonzales</td>
+<td>erick@alumno.buap.mx</td>
+<td>2211668877</td>
+<td>Desarrollo</td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>p012</td>
+<td>Saul Gomex</td>
+<td>saul@correo.com</td>
+<td>1234567895</td>
+<td>Diseño</td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>p013</td>
+<td>PollingTest Verifica</td>
+<td>poll@test.com</td>
+<td></td>
+<td></td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+</tbody>
+</table></section><section><h2>Catálogo de proyectos</h2>
+<table>
+<thead><tr>
+<th>ID</th>
+<th>Proyecto</th>
+<th>Titular</th>
+<th>Estado</th>
+<th>Inicio</th>
+<th>Fin</th>
+<th>Última actualización</th>
+<th>Presupuesto</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>pr001</td>
+<td>
+<strong>Sistema de Ventas</strong><br><span class="descripcion">Plataforma de gestión de ventas online con integración a pasarela de pago.</span>
+</td>
+<td>Ana García López</td>
+<td><span class="estado activo">activo</span></td>
+<td>2025-01-15</td>
+<td>2025-12-31</td>
+<td>2026-10-08</td>
+<td>USD 50000</td>
+</tr>
+<tr>
+<td>pr002</td>
+<td>
+<strong>App Móvil Clientes</strong><br><span class="descripcion">Aplicación móvil iOS y Android para clientes frecuentes.</span>
+</td>
+<td>Ana García López</td>
+<td><span class="estado activo">activo</span></td>
+<td>2025-03-01</td>
+<td>2026-06-30</td>
+<td>2026-10-08</td>
+<td>USD 35000</td>
+</tr>
+<tr>
+<td>pr003</td>
+<td>
+<strong>Migración a la Nube</strong><br><span class="descripcion">Traslado de la infraestructura on-premise a servicios cloud.</span>
+</td>
+<td>Elena Sánchez Vidal</td>
+<td><span class="estado pendiente_reasignacion">pendiente_reasignacion</span></td>
+<td>2024-09-01</td>
+<td>2026-03-31</td>
+<td>2026-10-08</td>
+<td>USD 75000</td>
+</tr>
+<tr>
+<td>pr004</td>
+<td>
+<strong>Rediseño de Portal</strong><br><span class="descripcion">Rediseño completo del portal corporativo con nueva identidad visual.</span>
+</td>
+<td>María Fernández Soto</td>
+<td><span class="estado cerrado">cerrado</span></td>
+<td>2023-05-01</td>
+<td>2024-04-30</td>
+<td>2024-05-02</td>
+<td>USD 22000</td>
+</tr>
+<tr>
+<td>pr005</td>
+<td>
+<strong>Auditoría de Seguridad</strong><br><span class="descripcion">Auditoría externa de seguridad sobre los sistemas heredados.</span>
+</td>
+<td>Elena Sánchez Vidal</td>
+<td><span class="estado cancelado">cancelado</span></td>
+<td>2025-06-01</td>
+<td>No definida</td>
+<td>2026-10-08</td>
+<td>No definido</td>
+</tr>
+<tr>
+<td>pr006</td>
+<td>
+<strong>test</strong><br><span class="descripcion">test</span>
+</td>
+<td>Marco Vazquez</td>
+<td><span class="estado activo">activo</span></td>
+<td>2026-10-15</td>
+<td>No definida</td>
+<td>2026-10-15</td>
+<td>MXN 500</td>
+</tr>
+</tbody>
+</table></section><section><h2>Participaciones por proyecto</h2>
+<table>
+<thead><tr>
+<th>Proyecto</th>
+<th>Persona</th>
+<th>Rol</th>
+<th>Estado de participación</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Sistema de Ventas</td>
+<td>Ana García López</td>
+<td><span class="director">Director</span></td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>Sistema de Ventas</td>
+<td>Luis Martínez Ruiz</td>
+<td>
+                                            Miembro
+                                        </td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>Sistema de Ventas</td>
+<td>Carlos Ruiz Navarro</td>
+<td>
+                                            Miembro
+                                        </td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>App Móvil Clientes</td>
+<td>Ana García López</td>
+<td><span class="director">Director</span></td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>App Móvil Clientes</td>
+<td>Luis Martínez Ruiz</td>
+<td>
+                                            Miembro
+                                        </td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>App Móvil Clientes</td>
+<td>Carlos Ruiz Navarro</td>
+<td>Observador</td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>Migración a la Nube</td>
+<td>Elena Sánchez Vidal</td>
+<td><span class="director">Director</span></td>
+<td><span class="estado historico">historico</span></td>
+</tr>
+<tr>
+<td>Migración a la Nube</td>
+<td>Luis Martínez Ruiz</td>
+<td>
+                                            Miembro
+                                        </td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>Migración a la Nube</td>
+<td>María Fernández Soto</td>
+<td>
+                                            Miembro
+                                        </td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>Rediseño de Portal</td>
+<td>María Fernández Soto</td>
+<td><span class="director">Director</span></td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>Rediseño de Portal</td>
+<td>Carlos Ruiz Navarro</td>
+<td>Observador</td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>Auditoría de Seguridad</td>
+<td>Elena Sánchez Vidal</td>
+<td><span class="director">Director</span></td>
+<td><span class="estado historico">historico</span></td>
+</tr>
+<tr>
+<td>test</td>
+<td>Marco Vazquez</td>
+<td><span class="director">Director</span></td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+<tr>
+<td>test</td>
+<td>Luis Martínez Ruiz</td>
+<td>
+                                            Miembro
+                                        </td>
+<td><span class="estado activo">activo</span></td>
+</tr>
+</tbody>
+</table></section><footer>
+                Sistema de gestión de personas y proyectos
+            </footer>
+</body>
+</html>
