@@ -1,0 +1,27 @@
+# Backups generados por el CLI y el CGI
+data/.backups/
+
+# Paquetes de entrega
+entrega-proyecto-*.zip
+
+# Auxiliares de LaTeX
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*~
+
+# Temporales
+*.tmp
+*.bak
