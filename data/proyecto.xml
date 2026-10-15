@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datos xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="proyecto.xsd">
+  <personas>
+    <persona id="p001" estado="activo">
+      <nombre>Ana</nombre>
+      <apellidos>García López</apellidos>
+      <email>ana.garcia@ejemplo.com</email>
+      <telefono>555-1001</telefono>
+      <departamento>Desarrollo</departamento>
+      <historial>
+        <evento tipo="creacion"/>
+      </historial>
+    </persona>
+    <persona id="p002" estado="activo">
+      <nombre>Luis</nombre>
+      <apellidos>Martínez Ruiz</apellidos>
+      <email>luis.martinez@ejemplo.com</email>
+      <telefono>555-1002</telefono>
+      <departamento>Desarrollo</departamento>
+      <historial>
+        <evento tipo="creacion"/>
+      </historial>
+    </persona>
+    <persona id="p003" estado="activo">
+      <nombre>María</nombre>
+      <apellidos>Fernández Soto</apellidos>
+      <email>maria.fernandez@ejemplo.com</email>
+      <telefono>555-1003</telefono>
+      <departamento>Diseño</departamento>
+      <historial>
+        <evento tipo="creacion"/>
+      </historial>
+    </persona>
+    <persona id="p004" estado="activo">
+      <nombre>Carlos</nombre>
+      <apellidos>Ruiz Navarro</apellidos>
+      <email>carlos.ruiz@ejemplo.com</email>
+      <telefono>555-1004</telefono>
+      <departamento>QA</departamento>
+      <historial>
+        <evento tipo="creacion"/>
+      </historial>
+    </persona>
+    <persona id="p005" estado="inactivo">
+      <nombre>Elena</nombre>
+      <apellidos>Sánchez Vidal</apellidos>
+      <email>elena.sanchez@ejemplo.com</email>
+      <telefono>555-1005</telefono>
+      <departamento>Gestión</departamento>
+      <historial>
+        <evento tipo="creacion"/>
+        <evento tipo="baja" motivo="Renuncia"/>
+      </historial>
+    </persona>
+    <persona id="p006" estado="activo">
+      <nombre>Marco</nombre>
+      <apellidos>Vazquez</apellidos>
+      <email>a@a.com</email>
+      <historial>
+        <evento tipo="creacion" fecha="2026-10-14"/>
+        <evento tipo="actualizacion" campo="apellidos" fecha="2026-10-14"/>
+      </historial>
+    </persona>
+    <persona id="p007" estado="activo">
+      <nombre>Marco</nombre>
+      <apellidos>cadena</apellidos>
+      <email>correo@a.com</email>
+      <historial>
+        <evento tipo="creacion" fecha="2026-10-14"/>
+      </historial>
+    </persona>
+    <persona id="p008" estado="activo">
+      <nombre>Alejandro</nombre>
+      <apellidos>Sans</apellidos>
+      <email>alejandro@correo.com</email>
+      <telefono>2211887956</telefono>
+      <departamento>QA</departamento>
+      <historial>
+        <evento tipo="creacion" fecha="2026-10-15"/>
+      </historial>
+    </persona>
+    <persona id="p009" estado="inactivo">
+      <nombre>CLI</nombre>
+      <apellidos>Test</apellidos>
+      <email>cli@x.com</email>
+      <historial>
+        <evento tipo="creacion" fecha="2026-10-15"/>
+        <evento tipo="baja" motivo="test" fecha="2026-10-15"/>
+      </historial>
+    </persona>
+    <persona id="p010" estado="inactivo">
+      <nombre>Sync</nombre>
+      <apellidos>Test</apellidos>
+      <email>sync@x.com</email>
+      <historial>
+        <evento tipo="creacion" fecha="2026-10-15"/>
+        <evento tipo="baja" motivo="test" fecha="2026-10-15"/>
+      </historial>
+    </persona>
+    <persona id="p011" estado="activo">
+      <nombre>Erick</nombre>
+      <apellidos>Gonzales</apellidos>
+      <email>erick@alumno.buap.mx</email>
+      <telefono>2211668877</telefono>
+      <departamento>Desarrollo</departamento>
+      <historial>
+        <evento tipo="creacion" fecha="2026-10-15"/>
+      </historial>
+    </persona>
+    <persona id="p012" estado="activo">
+      <nombre>Saul</nombre>
+      <apellidos>Gomex</apellidos>
+      <email>saul@correo.com</email>
+      <telefono>1234567895</telefono>
+      <departamento>Diseño</departamento>
+      <historial>
+        <evento tipo="creacion" fecha="2026-10-15"/>
+      </historial>
+    </persona>
+    <persona id="p013" estado="activo">
+      <nombre>PollingTest</nombre>
+      <apellidos>Verifica</apellidos>
+      <email>poll@test.com</email>
+      <historial>
+        <evento tipo="creacion" fecha="2026-10-15"/>
+      </historial>
+    </persona>
+  </personas>
+  <proyectos>
+    <proyecto id="pr001" titularId="p001" estado="activo">
+      <nombre>Sistema de Ventas</nombre>
+      <descripcion>Plataforma de gestión de ventas online con integración a pasarela de pago.</descripcion>
+      <fechaInicio>2025-01-15</fechaInicio>
+      <fechaFin>2025-12-31</fechaFin>
+      <ultimaActualizacion>2026-10-08</ultimaActualizacion>
+      <presupuesto moneda="USD">50000</presupuesto>
+      <historial>
+        <evento tipo="creacion"/>
+      </historial>
+    </proyecto>
+    <proyecto id="pr002" titularId="p001" estado="activo">
+      <nombre>App Móvil Clientes</nombre>
+      <descripcion>Aplicación móvil iOS y Android para clientes frecuentes.</descripcion>
+      <fechaInicio>2025-03-01</fechaInicio>
+      <fechaFin>2026-06-30</fechaFin>
+      <ultimaActualizacion>2026-10-08</ultimaActualizacion>
+      <presupuesto moneda="USD">35000</presupuesto>
+      <historial>
+        <evento tipo="creacion"/>
+      </historial>
+    </proyecto>
+    <proyecto id="pr003" titularId="p005" estado="pendiente_reasignacion">
+      <nombre>Migración a la Nube</nombre>
+      <descripcion>Traslado de la infraestructura on-premise a servicios cloud.</descripcion>
+      <fechaInicio>2024-09-01</fechaInicio>
+      <fechaFin>2026-03-31</fechaFin>
+      <ultimaActualizacion>2026-10-08</ultimaActualizacion>
+      <presupuesto moneda="USD">75000</presupuesto>
+      <historial>
+        <evento tipo="creacion"/>
+        <evento tipo="pendiente_reasignacion" motivo="Baja de p005"/>
+      </historial>
+    </proyecto>
+    <proyecto id="pr004" titularId="p003" estado="cerrado">
+      <nombre>Rediseño de Portal</nombre>
+      <descripcion>Rediseño completo del portal corporativo con nueva identidad visual.</descripcion>
+      <fechaInicio>2023-05-01</fechaInicio>
+      <fechaFin>2024-04-30</fechaFin>
+      <ultimaActualizacion>2024-05-02</ultimaActualizacion>
+      <presupuesto moneda="USD">22000</presupuesto>
+      <historial>
+        <evento tipo="creacion"/>
+        <evento tipo="cierre" motivo="Entrega final"/>
+      </historial>
+    </proyecto>
+    <proyecto id="pr005" titularId="p005" estado="cancelado">
+      <nombre>Auditoría de Seguridad</nombre>
+      <descripcion>Auditoría externa de seguridad sobre los sistemas heredados.</descripcion>
+      <fechaInicio>2025-06-01</fechaInicio>
+      <ultimaActualizacion>2026-10-08</ultimaActualizacion>
+      <historial>
+        <evento tipo="creacion"/>
+        <evento tipo="cancelacion" motivo="Baja del único participante (p005)"/>
+      </historial>
+    </proyecto>
+    <proyecto id="pr006" titularId="p006" estado="activo">
+      <nombre>test</nombre>
+      <descripcion>test</descripcion>
+      <fechaInicio>2026-10-15</fechaInicio>
+      <ultimaActualizacion>2026-10-15</ultimaActualizacion>
+      <presupuesto moneda="MXN">500</presupuesto>
+      <historial>
+        <evento tipo="creacion" fecha="2026-10-15"/>
+        <evento tipo="actualizacion" motivo="Alta de p002 como miembro" campo="equipo" fecha="2026-10-15"/>
+      </historial>
+    </proyecto>
+  </proyectos>
+  <participaciones>
+    <participacion id="pa001" personaId="p001" proyectoId="pr001" rol="director" estado="activo"/>
+    <participacion id="pa002" personaId="p002" proyectoId="pr001" rol="miembro" estado="activo"/>
+    <participacion id="pa003" personaId="p004" proyectoId="pr001" rol="miembro" estado="activo"/>
+    <participacion id="pa004" personaId="p001" proyectoId="pr002" rol="director" estado="activo"/>
+    <participacion id="pa005" personaId="p002" proyectoId="pr002" rol="miembro" estado="activo"/>
+    <participacion id="pa006" personaId="p004" proyectoId="pr002" rol="observador" estado="activo"/>
+    <participacion id="pa007" personaId="p005" proyectoId="pr003" rol="director" estado="historico"/>
+    <participacion id="pa008" personaId="p002" proyectoId="pr003" rol="miembro" estado="activo"/>
+    <participacion id="pa009" personaId="p003" proyectoId="pr003" rol="miembro" estado="activo"/>
+    <participacion id="pa010" personaId="p003" proyectoId="pr004" rol="director" estado="activo"/>
+    <participacion id="pa011" personaId="p004" proyectoId="pr004" rol="observador" estado="activo"/>
+    <participacion id="pa012" personaId="p005" proyectoId="pr005" rol="director" estado="historico"/>
+    <participacion id="pa013" personaId="p006" proyectoId="pr006" rol="director" estado="activo"/>
+    <participacion id="pa014" personaId="p002" proyectoId="pr006" rol="miembro" estado="activo"/>
+  </participaciones>
+</datos>

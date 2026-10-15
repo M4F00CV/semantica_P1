@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified">
+
+  <!-- ============================================================ -->
+  <!-- ELEMENTO RAÍZ                                                -->
+  <!-- ============================================================ -->
+  <xs:element name="datos" type="TipoDatos"/>
+
+
+  <!-- ============================================================ -->
+  <!-- RAÍZ: datos                                                  -->
+  <!-- ============================================================ -->
+  <xs:complexType name="TipoDatos">
+    <xs:sequence>
+      <xs:element name="personas"       type="TipoListaPersonas"/>
+      <xs:element name="proyectos"      type="TipoListaProyectos"/>
+      <xs:element name="participaciones" type="TipoListaParticipaciones"/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!-- ============================================================ -->
+  <!-- PERSONAS                                                     -->
+  <!-- ============================================================ -->
+
+  <xs:complexType name="TipoListaPersonas">
+    <xs:sequence>
+      <xs:element name="persona" type="TipoPersona" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="TipoPersona">
+    <xs:sequence>
+      <xs:element name="nombre"       type="TipoNombre"/>
+      <xs:element name="apellidos"    type="TipoNombre"/>
+      <xs:element name="email"        type="TipoEmail"/>
+      <xs:element name="telefono"     type="TipoTelefono"     minOccurs="0"/>
+      <xs:element name="departamento" type="TipoNombre"       minOccurs="0"/>
+      <xs:element name="historial"    type="TipoHistorial"/>
+    </xs:sequence>
+    <xs:attribute name="id"     type="xs:ID"          use="required"/>
+    <xs:attribute name="estado" type="TipoEstadoPersona" use="required"/>
+  </xs:complexType>
+
+
+  <!-- ============================================================ -->
+  <!-- PROYECTOS                                                    -->
+  <!-- ============================================================ -->
+
+  <xs:complexType name="TipoListaProyectos">
+    <xs:sequence>
+      <xs:element name="proyecto" type="TipoProyecto" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="TipoProyecto">
+    <xs:sequence>
+      <xs:element name="nombre"               type="TipoNombre"/>
+      <xs:element name="descripcion"          type="TipoDescripcion"/>
+      <xs:element name="fechaInicio"          type="xs:date"/>
+      <xs:element name="fechaFin"             type="xs:date" minOccurs="0"/>
+      <xs:element name="ultimaActualizacion"  type="xs:date"/>
+      <xs:element name="presupuesto"          type="TipoPresupuesto" minOccurs="0"/>
+      <xs:element name="historial"            type="TipoHistorial"/>
+    </xs:sequence>
+    <xs:attribute name="id"        type="xs:ID"           use="required"/>
+    <xs:attribute name="titularId" type="xs:IDREF"        use="required"/>
+    <xs:attribute name="estado"    type="TipoEstadoProyecto" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="TipoPresupuesto">
+    <xs:simpleContent>
+      <xs:extension base="TipoMontoPositivo">
+        <xs:attribute name="moneda" type="TipoMoneda" use="optional" default="USD"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+
+  <!-- ============================================================ -->
+  <!-- PARTICIPACIONES                                              -->
+  <!-- ============================================================ -->
+
+  <xs:complexType name="TipoListaParticipaciones">
+    <xs:sequence>
+      <xs:element name="participacion" type="TipoParticipacion"
+                  minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="TipoParticipacion">
+    <xs:attribute name="id"          type="xs:ID"             use="required"/>
+    <xs:attribute name="personaId"   type="xs:IDREF"          use="required"/>
+    <xs:attribute name="proyectoId"  type="xs:IDREF"          use="required"/>
+    <xs:attribute name="rol"         type="TipoRol"           use="required"/>
+    <xs:attribute name="estado"      type="TipoEstadoParticipacion" use="required"/>
+  </xs:complexType>
+
+
+  <!-- ============================================================ -->
+  <!-- HISTORIAL Y EVENTOS                                          -->
+  <!-- ============================================================ -->
+
+  <xs:complexType name="TipoHistorial">
+    <xs:sequence>
+      <xs:element name="evento" type="TipoEvento"
+                  minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="TipoEvento">
+    <xs:attribute name="tipo"   type="TipoEventoTipo" use="required"/>
+    <xs:attribute name="motivo" type="TipoTextoNoVacio" use="optional"/>
+    <xs:attribute name="campo"  type="TipoTextoNoVacio" use="optional"/>
+    <xs:attribute name="fecha"  type="xs:date"          use="optional"/>
+  </xs:complexType>
+
+
+  <!-- ============================================================ -->
+  <!-- TIPOS SIMPLES: TEXTO                                         -->
+  <!-- ============================================================ -->
+
+  <xs:simpleType name="TipoTextoNoVacio">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TipoNombre">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="100"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TipoDescripcion">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="500"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TipoEmail">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TipoTelefono">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9\-\+\s]{6,20}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!-- ============================================================ -->
+  <!-- TIPOS SIMPLES: NÚMEROS Y MONEDA                              -->
+  <!-- ============================================================ -->
+
+  <xs:simpleType name="TipoMontoPositivo">
+    <xs:restriction base="xs:decimal">
+      <xs:minExclusive value="0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TipoMoneda">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="USD"/>
+      <xs:enumeration value="EUR"/>
+      <xs:enumeration value="MXN"/>
+      <xs:enumeration value="GBP"/>
+      <xs:enumeration value="JPY"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!-- ============================================================ -->
+  <!-- TIPOS SIMPLES: ESTADOS                                       -->
+  <!-- ============================================================ -->
+
+  <xs:simpleType name="TipoEstadoPersona">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="activo"/>
+      <xs:enumeration value="inactivo"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TipoEstadoProyecto">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="activo"/>
+      <xs:enumeration value="cerrado"/>
+      <xs:enumeration value="cancelado"/>
+      <xs:enumeration value="pendiente_reasignacion"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TipoEstadoParticipacion">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="activo"/>
+      <xs:enumeration value="historico"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TipoRol">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="director"/>
+      <xs:enumeration value="miembro"/>
+      <xs:enumeration value="observador"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!-- ============================================================ -->
+  <!-- TIPOS SIMPLES: EVENTOS                                       -->
+  <!-- ============================================================ -->
+
+  <xs:simpleType name="TipoEventoTipo">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="creacion"/>
+      <xs:enumeration value="actualizacion"/>
+      <xs:enumeration value="baja"/>
+      <xs:enumeration value="reactivacion"/>
+      <xs:enumeration value="cancelacion"/>
+      <xs:enumeration value="cierre"/>
+      <xs:enumeration value="pendiente_reasignacion"/>
+      <xs:enumeration value="reasignacion"/>
+      <xs:enumeration value="salida"/>
+      <xs:enumeration value="reincorporacion"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+</xs:schema>

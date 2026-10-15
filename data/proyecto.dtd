@@ -1,0 +1,108 @@
+<!-- ============================================================ -->
+<!-- DTD: Sistema de gestión de personas y proyectos              -->
+<!-- Valida la estructura lógica de proyecto.xml                  -->
+<!-- ============================================================ -->
+
+<!-- ==================== RAÍZ ==================== -->
+<!ELEMENT datos (personas, proyectos, participaciones)>
+
+<!-- ==================== PERSONAS ==================== -->
+<!ELEMENT personas (persona+)>
+
+<!ELEMENT persona (
+    nombre,
+    apellidos,
+    email,
+    telefono?,
+    departamento?,
+    historial
+)>
+
+<!ATTLIST persona
+    id      ID                   #REQUIRED
+    estado  (activo | inactivo)  #REQUIRED
+>
+
+<!ELEMENT nombre        (#PCDATA)>
+<!ELEMENT apellidos     (#PCDATA)>
+<!ELEMENT email         (#PCDATA)>
+<!ELEMENT telefono      (#PCDATA)>
+<!ELEMENT departamento  (#PCDATA)>
+
+<!-- ==================== HISTORIAL ==================== -->
+<!-- Puede estar vacío (un registro recién creado podría no tener eventos) -->
+<!ELEMENT historial (evento*)>
+
+<!ELEMENT evento EMPTY>
+
+<!ATTLIST evento
+    tipo (
+        creacion                |
+        actualizacion           |
+        baja                    |
+        reactivacion            |
+        cancelacion             |
+        cierre                  |
+        pendiente_reasignacion  |
+        reasignacion            |
+        salida                  |
+        reincorporacion
+    ) #REQUIRED
+    motivo  CDATA #IMPLIED
+    campo   CDATA #IMPLIED
+    fecha   CDATA #IMPLIED
+>
+
+<!-- ==================== PROYECTOS ==================== -->
+<!ELEMENT proyectos (proyecto+)>
+
+<!ELEMENT proyecto (
+    nombre,
+    descripcion,
+    fechaInicio,
+    fechaFin?,
+    ultimaActualizacion,
+    presupuesto?,
+    historial
+)>
+
+<!ATTLIST proyecto
+    id         ID      #REQUIRED
+    titularId  IDREF   #REQUIRED
+    estado (
+        activo                  |
+        pendiente_reasignacion  |
+        cerrado                 |
+        cancelado
+    ) #REQUIRED
+>
+
+<!ELEMENT descripcion         (#PCDATA)>
+<!ELEMENT fechaInicio         (#PCDATA)>
+<!ELEMENT fechaFin            (#PCDATA)>
+<!ELEMENT ultimaActualizacion (#PCDATA)>
+
+<!ELEMENT presupuesto (#PCDATA)>
+
+<!ATTLIST presupuesto
+    moneda (USD | EUR | MXN | GBP | JPY) "USD"
+>
+
+<!-- ==================== PARTICIPACIONES ==================== -->
+<!-- Puede estar vacío (un sistema recién instalado no tiene ninguna) -->
+<!ELEMENT participaciones (participacion*)>
+
+<!ELEMENT participacion EMPTY>
+
+<!ATTLIST participacion
+    id          ID                                #REQUIRED
+    personaId   IDREF                             #REQUIRED
+    proyectoId  IDREF                             #REQUIRED
+    rol         (director | miembro | observador) #REQUIRED
+    estado      (activo | historico)              #REQUIRED
+>
+
+<!-- Atributos para la referencia al XSD (necesarios porque la SPA los emite) -->
+<!ATTLIST datos
+    xmlns:xsi                     CDATA #IMPLIED
+    xsi:noNamespaceSchemaLocation CDATA #IMPLIED>
